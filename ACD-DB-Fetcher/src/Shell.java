@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -42,25 +42,40 @@ public class Shell {
 			System.out.println("We got a result!");
 			
 			/******
-			 * Print result 
+			 * Save result 
 			 ******/
-			
+			String path = "whole-data-slice.csv";
 			int colCount = rsmd.getColumnCount();
+			List<String[]> buffer = new LinkedList<String[]>();
+			int writtenRows = 0;
+			final int bufferThreshold = 1000;
+			
+			String[] headers = new String[colCount];
 			for (int i = 1; i <= colCount; i++) {
-				if (i > 1)
-					System.out.print("; ");
-				System.out.print(rsmd.getColumnName(i));
+				headers[i-1] = rsmd.getColumnName(i);
 			}
-			System.out.print("\n");
+			buffer.add(headers);
+			
 			while (result.next()) {
-				for (int i = 1; i <= colCount; i++) {
-					if (i > 1)
-						System.out.print(",  ");
-					String columnValue = result.getString(i);
-					System.out.print(columnValue);
+				if (buffer.size() >= bufferThreshold) {
+					writeBuffer(path, buffer);
+					writtenRows += buffer.size();
+					System.out.println(writtenRows + " rows written.");
+					buffer = new LinkedList<String[]>();
 				}
-				System.out.println("");
+				
+				String[] line = new String[colCount];
+				for (int i = 1; i <= colCount; i++) {
+					String columnValue = result.getString(i);
+					line[i-1] = columnValue;
+				}
+				buffer.add(line);
 			}
+			
+			writeBuffer(path, buffer);
+			writtenRows += buffer.size();
+			System.out.println(writtenRows + " rows written.");
+			buffer = new LinkedList<String[]>();
 			
 			connection.close();
 		} catch (SQLException e) {
@@ -72,34 +87,28 @@ public class Shell {
 		 * http://viralpatel.net/blogs/java-read-write-csv-file/
 		 ******/
 
-		String csv = "country-capital.csv";
+	}
+	
+	private static void writeBuffer(String path, List<String[]> buffer) {
+		String csv = path;
 		CSVWriter writer = null;
 
 		try {
 			File f = new File(csv);
 			if(f.exists() && !f.isDirectory()) { 
-				System.out.println("Found existing file!");
-				writer = new CSVWriter(new FileWriter(f),';');
+				writer = new CSVWriter(new FileWriter(f, true),';');
 			} else if (!f.exists() && !f.isDirectory()){
-				System.out.println("File not found, creating...");
 				f.createNewFile();
-				writer = new CSVWriter(new FileWriter(f),';');
+				writer = new CSVWriter(new FileWriter(f, true),';');
 			} else {
 				System.out.println("That is no file, it's a directory!");
 			}
 
-			List<String[]> data = new ArrayList<String[]>();
-			data.add(new String[] { "India", "New Delhi" });
-			data.add(new String[] { "United States", "Washington D.C" });
-			data.add(new String[] { "Germany", "Berlin" });
-
-			writer.writeAll(data);
+			writer.writeAll(buffer);
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Could not write file." + e);
 		}
-		
-		
 	}
 
 }
