@@ -3,6 +3,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +20,51 @@ public class Shell {
 		 ******/
 
 		Connection connection = null;
-		String SQL = "SELECT YY, MM, COUNT(MM) " + "FROM PARSED_STATEMENTS " + "WHERE YY >= 2003 AND YY <= 2005 "
-				+ "GROUP BY YY, MM " + "ORDER BY YY, MM";
+		ResultSet result = null;
+		ResultSetMetaData rsmd = null;
+		String SQL_DISTRIBUTION = "SELECT YY, MM, COUNT(MM) " 
+								+ "FROM PARSED_STATEMENTS "
+								+ "WHERE YY >= 2003 AND YY <= 2005 "
+								+ "GROUP BY YY, MM "
+								+ "ORDER BY YY, MM";
+		String SQL_DATA_SLICE_1 = "SELECT * FROM "
+								+ "BDCOURSE.PARSED_STATEMENTS "
+								+ "WHERE TRUNC(THETIME) >= TO_DATE('2003-04-01', 'YYYY-MM-DD') "
+								//+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
+								+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
 
 		try {
 			connection = DriverManager.getConnection("jdbc:oracle:thin:@marsara.ipd.kit.edu:1521:student", "bdcourse",
 					"bdcourse");
-			System.out.println(connection.prepareStatement(SQL).executeQuery());
+			result = connection.prepareStatement(SQL_DATA_SLICE_1).executeQuery();
+			rsmd = result.getMetaData();
+			
+			System.out.println("We got a result!");
+			
+			/******
+			 * Print result 
+			 ******/
+			
+			int colCount = rsmd.getColumnCount();
+			for (int i = 1; i <= colCount; i++) {
+				if (i > 1)
+					System.out.print("; ");
+				System.out.print(rsmd.getColumnName(i));
+			}
+			System.out.print("\n");
+			while (result.next()) {
+				for (int i = 1; i <= colCount; i++) {
+					if (i > 1)
+						System.out.print(",  ");
+					String columnValue = result.getString(i);
+					System.out.print(columnValue);
+				}
+				System.out.println("");
+			}
+			
 			connection.close();
 		} catch (SQLException e) {
-			System.out.println("Could not establish server connection.");
+			System.out.println("Could not establish server connection. " + e);
 		}
 
 		/******
