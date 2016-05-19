@@ -45,7 +45,7 @@ public class Shell {
 				+ "WHERE TRUNC(THETIME) >= TO_DATE('2003-04-01', 'YYYY-MM-DD') "
 				//+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
 				+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD') "
-				+ "AND SEQ <=1407584931 AND SEQ >=18346 "
+				+ "AND SEQ between 18346 and 1407584931 "
 				+ "AND can_be_stifle = 0 "
 				+ "AND PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
 				+ "AND FROM_WHERE_STATEMENTS.distinct_ips_count >=20"
