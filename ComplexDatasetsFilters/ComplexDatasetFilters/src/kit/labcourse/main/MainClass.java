@@ -11,7 +11,7 @@ public class MainClass {
 
 	public static void main(String[] args) {
 		try {
-			BufferedReader readFirstTask = new BufferedReader(new FileReader(new File(".\\firstTaskStatements.csv")));
+			BufferedReader readFirstTask = new BufferedReader(new FileReader(new File("S:\\git\\datenanalyse\\ACD-DB-Fetcher\\whole-data-slice.csv")));
 			FilterForSecondTask.filter(readFirstTask);
 		} catch (FileNotFoundException e) {
 			System.out.println("Problem with opening the first task!");

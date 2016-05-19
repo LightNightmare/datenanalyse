@@ -137,7 +137,7 @@ public class FilterForSecondTask {
 		long counterOfQueriesWithFunc = 0;
 		
 		try {
-			secondTaskData = new BufferedWriter(new FileWriter(new File(".\\secondTaskFilteredStatements.csv")));
+			secondTaskData = new BufferedWriter(new FileWriter(new File("secondTaskFilteredStatements.csv"), true));
 		} catch (IOException e) {
 			System.out.println("The writer for the filtered statements could not be opened!");
 			e.printStackTrace();
@@ -567,17 +567,17 @@ public class FilterForSecondTask {
 			e.printStackTrace();
 		}
 		
-	//	try {
-	//		secondTaskData = new BufferedWriter(new FileWriter(new File(".\\secondTaskStatistics.txt")));
+		try {
+		secondTaskData = new BufferedWriter(new FileWriter(new File("secondTaskStatistics.txt"), true));
 			
-	//		userFunctions.forEach(
-	//				(key, value) -> {try {
-	//					secondTaskData.write(key + " : " + value + "\n");
-	//					secondTaskData.write("woo");
-	//				} catch (Exception e) {
-	//					System.out.println("There was a problem with the population of the statistics file!");;
-	//					e.printStackTrace();
-	//				}});
+			userFunctions.forEach(
+					(key, value) -> {try {
+						secondTaskData.write(key + " : " + value + "\n");
+						secondTaskData.write("woo");
+					} catch (Exception e) {
+						System.out.println("There was a problem with the population of the statistics file!");;
+						e.printStackTrace();
+					}});
 			userFunctions.forEach(
 					(key, value) -> {try {
 						System.out.println(key + " : " + value);
@@ -587,10 +587,10 @@ public class FilterForSecondTask {
 					}});
 			System.out.println("Number of filtered statements: " + counterOfQueries);
 			System.out.println("Number of original statements: " + (counterOfQueries + counterOfQueriesWithFunc));
-	//	} catch (IOException e) {
-	//		System.out.println("There was a problem with the statistics file!");
-	//		e.printStackTrace();
-	//	}
+		} catch (IOException e) {
+			System.out.println("There was a problem with the statistics file!");
+			e.printStackTrace();
+		}
 	}
 	
 }
