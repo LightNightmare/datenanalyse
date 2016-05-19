@@ -40,13 +40,15 @@ public class Shell {
 				+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD') "
 				+ "AND can_be_stifle = 0";
 		
-		String SQL_DATA_SLICE_4 = "SELECT * FROM "
-				+ "BDCOURSE.PARSED_STATEMENTS JOIN FROM_WHERE_STATEMENTS ON PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
+		String SQL_DATA_SLICE_4 = "SELECT STATEMENT FROM "
+				+ "BDCOURSE.PARSED_STATEMENTS ,FROM_WHERE_STATEMENTS "
 				+ "WHERE TRUNC(THETIME) >= TO_DATE('2003-04-01', 'YYYY-MM-DD') "
 				//+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
 				+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD') "
+				+ "AND SEQ <=1407584931 AND SEQ =>18346 "
 				+ "AND can_be_stifle = 0 "
-				+ "and distinct_ips_count between 20 and 1000";
+				+ "AND PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
+				+ "AND distinct_ips_count <=100 AND distinct_ips_count =>20";
 
 		try {
 			connection = DriverManager.getConnection("jdbc:oracle:thin:@marsara.ipd.kit.edu:1521:student", "bdcourse",
