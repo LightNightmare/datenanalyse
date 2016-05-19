@@ -33,16 +33,25 @@ public class Shell {
 								//+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
 								+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
 		String SQL_DATA_SLICE_3 = "SELECT * FROM "
-				+ "BDCOURSE.PARSED_STATEMENTS JOIN FROM_WHERE_STATEMENTS ON PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
+				//+ "BDCOURSE.PARSED_STATEMENTS JOIN FROM_WHERE_STATEMENTS ON PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
+				+ "BDCOURSE.PARSED_STATEMENTS "
 				+ "WHERE TRUNC(THETIME) >= TO_DATE('2003-04-01', 'YYYY-MM-DD') "
 				//+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
 				+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD') "
 				+ "AND can_be_stifle = 0";
+		
+		String SQL_DATA_SLICE_4 = "SELECT * FROM "
+				+ "BDCOURSE.PARSED_STATEMENTS JOIN FROM_WHERE_STATEMENTS ON PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
+				+ "WHERE TRUNC(THETIME) >= TO_DATE('2003-04-01', 'YYYY-MM-DD') "
+				//+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD')";
+				+ "AND TRUNC(THETIME) <= TO_DATE('2004-06-30', 'YYYY-MM-DD') "
+				+ "AND can_be_stifle = 0 "
+				+ "and distinct_ips_count between 20 and 1000";
 
 		try {
 			connection = DriverManager.getConnection("jdbc:oracle:thin:@marsara.ipd.kit.edu:1521:student", "bdcourse",
 					"bdcourse");
-			result = connection.prepareStatement(SQL_DATA_SLICE_3).executeQuery();
+			result = connection.prepareStatement(SQL_DATA_SLICE_4).executeQuery();
 			rsmd = result.getMetaData();
 			
 			System.out.println("We got a result!");
@@ -50,7 +59,7 @@ public class Shell {
 			/******
 			 * Save result 
 			 ******/
-			String path = "slice-3.csv";
+			String path = "slice-4.csv";
 			int colCount = rsmd.getColumnCount();
 			List<String[]> buffer = new LinkedList<String[]>();
 			int writtenRows = 0;
