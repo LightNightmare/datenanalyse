@@ -16,6 +16,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="S:/ojdbc7.jar"/>
+	<classpathentry exported="true" kind="lib" path="ojdbc7.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
