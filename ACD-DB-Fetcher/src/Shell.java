@@ -31,21 +31,20 @@ public class Shell {
 								+ "BDCOURSE.PARSED_STATEMENTS "
 								+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime <= '30-JUN-04 12.00.0.000000000 PM'";
 		String SQL_DATA_SLICE_3 = "SELECT * FROM "
-				//+ "BDCOURSE.PARSED_STATEMENTS JOIN FROM_WHERE_STATEMENTS ON PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
 				+ "BDCOURSE.PARSED_STATEMENTS "
 				+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime <= '30-JUN-04 12.00.0.000000000 PM' "
 				+ "AND can_be_stifle = 0";
 		
-		String SQL_DATA_SLICE_4 = "SELECT * FROM "
-				+ "BDCOURSE.PARSED_STATEMENTS JOIN FROM_WHERE_STATEMENTS ON PARSED_STATEMENTS.stat_id = FROM_WHERE_STATEMENTS.id "
-				+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime <= '30-JUN-04 12.00.0.000000000 PM' "
-				+ "AND can_be_stifle = 0 "
-				+ "and distinct_ips_count between 20 and 1000";
+		String SQL_DATA_SLICE_4 = "select parsed_statements.statement "
+				+ "from parsed_statements "
+				+ "where thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime < '30-JUN-04 12.00.0.000000000 PM' "
+				+ "and parsed_statements.CAN_BE_STIFLE = 0 "
+				+ "and STAT_ID not in(select id from FROM_WHERE_STATEMENTS where count > 1000 and DISTINCT_IPS_COUNT < 20) ";
 
 		try {
 			connection = DriverManager.getConnection("jdbc:oracle:thin:@marsara.ipd.kit.edu:1521:student", "bdcourse",
 					"bdcourse");
-			result = connection.prepareStatement(SQL_DATA_SLICE_1).executeQuery();
+			result = connection.prepareStatement(SQL_DATA_SLICE_4).executeQuery();
 			rsmd = result.getMetaData();
 			
 			System.out.println("We got a result!");
@@ -53,7 +52,7 @@ public class Shell {
 			/******
 			 * Save result 
 			 ******/
-			String path = "slice-2.csv";
+			String path = "slice-4.csv";
 			int colCount = rsmd.getColumnCount();
 			List<String[]> buffer = new LinkedList<String[]>();
 			int writtenRows = 0;
@@ -80,12 +79,13 @@ public class Shell {
 					line[i-1] = columnValue;
 				}
 				
-				if (containsUDF(line[17])) { //The column with the whole statement.
+				/*if (containsUDF(line[17])) { //The column with the whole statement.
 					filterHits++;
 					continue;
 				} else {
+				*/
 					buffer.add(line);
-				}
+				//}
 			}
 			
 			writeBuffer(path, buffer);
