@@ -29,15 +29,15 @@ public class Shell {
 								+ "ORDER BY YY, MM";
 		String SQL_DATA_SLICE_1 = "SELECT * FROM "
 								+ "BDCOURSE.PARSED_STATEMENTS "
-								+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime <= '30-JUN-04 12.00.0.000000000 PM'";
+								+ "WHERE thetime >= '01-APR-03 00.00.00.000000000 AM' and thetime <= '30-JUN-04 12.00.0.000000000 PM'";
 		String SQL_DATA_SLICE_3 = "SELECT * FROM "
 				+ "BDCOURSE.PARSED_STATEMENTS "
-				+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime <= '30-JUN-04 12.00.0.000000000 PM' "
+				+ "WHERE thetime >= '01-APR-03 00.00.00.000000000 AM' and thetime <= '30-JUN-04 12.00.0.000000000 PM' "
 				+ "AND can_be_stifle = 0";
 		
-		String SQL_DATA_SLICE_4 = "select parsed_statements.statement "
+		String SQL_DATA_SLICE_4 = "SELECT * FROM "
 				+ "from parsed_statements "
-				+ "where thetime >= '01-APR-03 12.00.00.000000000 PM' and thetime < '30-JUN-04 12.00.0.000000000 PM' "
+				+ "WHERE thetime >= '01-APR-03 00.00.00.000000000 AM' and thetime < '30-JUN-04 12.00.0.000000000 PM' "
 				+ "and parsed_statements.CAN_BE_STIFLE = 0 "
 				+ "and STAT_ID not in(select id from FROM_WHERE_STATEMENTS where count > 1000 and DISTINCT_IPS_COUNT < 20) ";
 
@@ -79,13 +79,13 @@ public class Shell {
 					line[i-1] = columnValue;
 				}
 				
-				/*if (containsUDF(line[17])) { //The column with the whole statement.
+				if (containsUDF(line[17])) { //The column with the whole statement.
 					filterHits++;
-					continue;
+					//continue;
 				} else {
-				*/
+				
 					buffer.add(line);
-				//}
+				}
 			}
 			
 			writeBuffer(path, buffer);
