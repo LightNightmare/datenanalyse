@@ -27,19 +27,19 @@ public class Shell {
 								+ "WHERE YY >= 2003 AND YY <= 2005 "
 								+ "GROUP BY YY, MM "
 								+ "ORDER BY YY, MM";
-		String SQL_DATA_SLICE_1 = "SELECT * FROM "
-								+ "BDCOURSE.PARSED_STATEMENTS "
-								+ "WHERE thetime >= '01-APR-03 00.00.00.000000000 AM' and thetime <= '30-JUN-04 12.00.0.000000000 PM'";
-		String SQL_DATA_SLICE_3 = "SELECT * FROM "
-				+ "BDCOURSE.PARSED_STATEMENTS "
-				+ "WHERE thetime >= '01-APR-03 00.00.00.000000000 AM' and thetime <= '30-JUN-04 12.00.0.000000000 PM' "
+		String SQL_DATA_SLICE_1 = "SELECT * "
+								+ "FROM BDCOURSE.PARSED_STATEMENTS "
+								+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 AM' and thetime < '01-JUL-04 12.00.0.000000000 AM'";
+		String SQL_DATA_SLICE_3 = "SELECT * "
+				+ "FROM BDCOURSE.PARSED_STATEMENTS "
+				+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 AM' and thetime < '01-JUL-04 12.00.0.000000000 AM' "
 				+ "AND can_be_stifle = 0";
 		
-		String SQL_DATA_SLICE_4 = "SELECT * FROM "
-				+ "from parsed_statements "
-				+ "WHERE thetime >= '01-APR-03 00.00.00.000000000 AM' and thetime < '30-JUN-04 12.00.0.000000000 PM' "
+		String SQL_DATA_SLICE_4 = "SELECT * "
+				+ "from parsed_statements inner join FROM_WHERE_STATEMENTS on STAT_ID = id "
+				+ "WHERE thetime >= '01-APR-03 12.00.00.000000000 AM' and thetime < '01-JUL-04 12.00.0.000000000 AM' "
 				+ "and parsed_statements.CAN_BE_STIFLE = 0 "
-				+ "and STAT_ID not in(select id from FROM_WHERE_STATEMENTS where count > 1000 and DISTINCT_IPS_COUNT < 20) ";
+				+ "and  not (count > 1000 and DISTINCT_IPS_COUNT < 20)";
 
 		try {
 			connection = DriverManager.getConnection("jdbc:oracle:thin:@marsara.ipd.kit.edu:1521:student", "bdcourse",
