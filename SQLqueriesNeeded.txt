@@ -1,0 +1,83 @@
+select statement
+from parsed_statements
+where yy = 2004 and mm between 7 and 12
+	or yy = 2005 and mm = 1;
+
+select parsed_statements.statement
+from parsed_statements, FROM_WHERE_STATEMENTS
+where seq between 340604592 and 1407576397 and
+  thetime >= '30-JUN-04 12.00.00.000000000 PM' and thetime < '31-JAN-05 12.00.0.000000000 PM'
+  and parsed_statements.STAT_ID = FROM_WHERE_STATEMENTS.ID
+  and parsed_statements.CAN_BE_STIFLE = 0;
+
+Since we have a seq index, it makes sense to actually get the info via it!
+Therefore:
+select statement
+from parsed_statements
+where seq between 340604592 and 1407576397;
+
+-------------------------------------------------------------------------
+
+FINAL FINAL QUERIES:
+select statement
+from parsed_statements
+where seq between 340604592 and 1407576397 and
+thetime >= '30-JUN-04 12.00.00.000000000 PM' and thetime < '31-JAN-05 12.00.0.000000000 PM';
+--> number of statements: 3999738
+--> 50 rows fetched in around 0.013 seconds
+--> 2 minutes to export file
+
+select parsed_statements.statement   --> must be rerun, will be much, much faster
+from parsed_statements
+where seq between 340604592 and 1407576397 and
+  thetime >= '30-JUN-04 12.00.00.000000000 PM' and thetime < '31-JAN-05 12.00.0.000000000 PM'
+  and parsed_statements.CAN_BE_STIFLE = 0;
+--> number of statements: 2641319
+--> 50 rows fetched in around 0.016 seconds
+--> 8 minutes to export file
+
+select parsed_statements.statement
+from parsed_statements, FROM_WHERE_STATEMENTS
+where seq between 340604592 and 1407576397 and
+  thetime >= '30-JUN-04 12.00.00.000000000 PM' and thetime < '31-JAN-05 12.00.0.000000000 PM'
+  and parsed_statements.STAT_ID = FROM_WHERE_STATEMENTS.ID
+  and parsed_statements.CAN_BE_STIFLE = 0
+  and FROM_WHERE_STATEMENTS.count > 1000
+  and FROM_WHERE_STATEMENTS.DISTINCT_IPS_COUNT < 20;
+--> number of statements: 2465347
+--> 50 rows fetched in around 10.016 seconds
+--> 12 minutes to export file
+
+
+--------------------------------------------------------------------------------
+
+
+  select parsed_statements.statement
+from parsed_statements--, FROM_WHERE_STATEMENTS
+where seq between 340604592 and 1407576397 and
+  thetime >= '30-JUN-04 12.00.00.000000000 PM' and thetime < '31-JAN-05 12.00.0.000000000 PM'
+  --and parsed_statements.STAT_ID = FROM_WHERE_STATEMENTS.ID
+  and parsed_statements.CAN_BE_STIFLE = 0
+  and parsed_statements.STAT_ID in (select id from FROM_WHERE_STATEMENTS where FROM_WHERE_STATEMENTS.count > 1000
+  and FROM_WHERE_STATEMENTS.DISTINCT_IPS_COUNT < 20);
+
+
+
+
+
+
+------> since the last query requires a looooot of time, the one we run at first is:
+  select parsed_statements.statement
+from parsed_statements, FROM_WHERE_STATEMENTS
+where seq between 340604592 and 1407576397 and
+  thetime >= '30-JUN-04 12.00.00.000000000 PM' and thetime < '31-JUL-04 12.00.0.000000000 PM'
+  and parsed_statements.STAT_ID = FROM_WHERE_STATEMENTS.ID
+  and parsed_statements.CAN_BE_STIFLE = 0
+  and FROM_WHERE_STATEMENTS.count > 1000
+  and FROM_WHERE_STATEMENTS.DISTINCT_IPS_COUNT < 20;
+---> note the change of date!
+---> that way we get around 220000 queries, to test the filter; we run the full query afterwards
+---> number of statements: 219991
+---> 50 rows fetched in around 1.094 seconds
+---> 1 minute to export
+---> no metadata tables...

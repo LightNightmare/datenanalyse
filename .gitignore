@@ -11,6 +11,9 @@ local.properties
 .loadpath
 .recommenders
 
+#CSV Files
+*.csv
+
 # Eclipse Core
 .project
 

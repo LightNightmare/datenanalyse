@@ -1,0 +1,62 @@
+Friday		11.10.2013
+accessarea/Converter.java				-> cleaned handling of aggr. functions
+
+Thursday	10.10.2013
+misc changes on many files including external tools to clean the whole code
+
+
+Tuesday		08.20.2013
+../resources/aima/..					-> added Tools for CNF Conversion
+accessarea/CNFPreparation.java				-> prepare our final where clause for conversion to CNF (special format for AIMA Tools needed)
+accessarea/FinalCNF.java				-> After CNF Conversion of the special format we construct the final where clause from this. Now we have our CNF
+accessarea/Converter.java				-> Refine parenthesis handling, add aprenthesis when OR
+accessarea/SQLParser.java				-> misc changes for CNF conversion
+accessarea/PreparedPredicates.java			-> new Object consisting of the where clause and the corresponding AIMA Format for conversion
+
+Saturday	05.10.2013 to Sunday 06.10.2013
+accessarea/Converter.java				-> ALL, ANY, subselect, right/left join, aggregate functions
+accessarea/SQLParser.java				-> having final
+
+Friday 		04.10.2013
+accessarea/Converter.java				-> full outer join + exists
+accessarea/SQLParser.java				-> from, select and where parsing final changes
+
+Thursday	03.10.2013
+accessarea/Converter.java				-> adapted visitBinaryExpression() to check if subexpression was set to TRUE or FALSE (due to NOT EXIST) and change the Expression accordingly
+accessarea/Converter.java				-> started handling NOT EXISTS
+accessarea/SQLParser.java				-> Adapted parseFROM() to handle SDSS functions (no conversion yet)
+src/net/sf/jsqlparser/expression/ExpressionVisitor.java -> adapted for SDSS functions in FROM part
+src/net/sf/jsqlparser/statement/select/FromItemVisitor.java -> From item can also be a function (i.e. SDSS function)
+src/net/sf/jsqlparser/expression/BooleanValue.java -> Added a BooleanValue to handle NOT EXISTS clauses (and potentially EXISTS with self-join as well)
+JSQLParser/JSqlParser-master/src/main/javacc/net/sf/jsqlparser/parser/JSqlParserCC.jj -> Adapted parser grammar to allow SDSS functions during parsing
+
+Tuesday		01.10.2013
+accessarea/Converter.java				-> catching NOT for AND, OR, Parenthesis, all binary predicates (<,>,...)
+accessarea/Converter.java				-> converting IN and NOT IN (for subquery and for expression list)
+
+Sunday		29.09.2013
+accessarea/Converter.java				-> finished converting of InverseExpression (i.e. "-"), Number and String Values, Parenthesis, arithmetic functions
+accessarea/Converter.java				-> converting AND and OR, BETWEEN, =, <=, <, >, >=, <>, %, LIKE
+
+Saturday	28.09.2013
+accessarea/SQLParser.java				-> finished parseFrom() (including Joins and pushing down of Join predicates, except OUTER JOINs)
+accessarea/SQLParser.java				-> added merge functions for Access Areas (unionAccessAreas() & intersect Access Areas())
+accessarea/Converter.java				-> changed all code to make full use of Visitor Pattern
+accessarea/AccessArea.java				-> added toString function
+
+Friday		27.09.2013
+accessarea/SQLParser.java				-> finished parseSelect()
+accessarea/SQLParser.java				-> finished parseWhere()
+accessarea/Converter.java				-> started with conversion of Standard Predicates
+
+Thursday 	26.09.2013
+accessarea/SQLParser.java				-> changed parseWhere() to start supporting conversion of predicates and Expression type instead of String
+accessarea/SQLParser.java				-> added selectFrom() dummy
+accessarea/SQLParser.java				-> added selectHaving() dummy
+accessarea/SQLParser.java				-> adapted parseSelect, including the support for AccessArea type (unfinished)
+accessarea/AccessArea.java				-> added this class for AccessArea type with get and set functions/procedures
+accessarea/AccessAreaExtraction.java			-> adapted for AccessArea type
+
+Tuesday 	24.09.2013
+accessarea/SQLParser.java				-> added subquery functionality to parseSelect()
+net/sf/jsqlparser/expression/HexValue.java		-> add Support for HexValues (changed Grammar as well)
