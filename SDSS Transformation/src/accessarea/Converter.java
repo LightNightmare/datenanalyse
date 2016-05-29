@@ -90,6 +90,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	private AccessArea accessArea = new AccessArea(new ArrayList<FromItem>(), initExpression);
 	private Expression subWhere;
 	private int fPhotoFlags = 0;
+	private int fPrimTarget = 0;
 	
 	private String alias = "";
 	public AccessArea convertPredicate(FunctionItem func){
@@ -353,7 +354,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					else {
 						try {
 							subQuery = "SELECT \"PhotoFlags"+fPhotoFlags+".value\" FROM PhotoFlags as PhotoFlags"+fPhotoFlags+" WHERE PhotoFlags"+fPhotoFlags+".name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
-							
 							fPhotoFlags++;
 							stack.push(parent); 
 							Statement stmt = CCJSqlParserUtil.parse(subQuery);
@@ -378,7 +378,49 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 						}
 					}
 					break;
-				
+				case	"fprimtarget":		//fprimtarget('[...]') where [...] is some String can always be rewritten as "SELECT value FROM PhotoFlags WHERE name = '[...]'"
+					String subQueryR3 = "SELECT \"PrimTarget.value\" FROM PrimTarget WHERE PrimTarget.name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+					if (fPrimTarget == 0)
+						try { //PrimTarget table never used in SDSS log, therefore no need to check for multiple occurrences //Problem: function used multiple times in some queries
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR3);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							fPrimTarget++;
+							subSelect.accept((ExpressionVisitor)this);
+							right.accept(this);
+						} catch (JSQLParserException e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					else {
+						try {
+							subQuery = "SELECT \"PrimTarget"+fPrimTarget+".value\" FROM PrimTarget as PrimTarget"+fPrimTarget+" WHERE PrimTarget"+fPrimTarget+".name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+							fPrimTarget++;
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR3);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							subSelect.accept((ExpressionVisitor)this);
+							stack.pop();
+							stack.pop();
+							if(parent!=null) {
+								stack.push(new BooleanValue(true));
+								stack.push(new BooleanValue(true));	
+								if(right != null) {
+									right.accept(this);
+									stack.pop();								
+								}
+							}
+							stack.push(new BooleanValue(true));
+						} catch (Exception e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					}
+					break;
 				case	"fphototypen":		//Returns the PhotoType name, indexed by value (3-> Galaxy, 6-> Star,...) 
 											//Can be rewritten as "select name from PhotoType where value = [...]" where [...] is the Parameter of the function
 					String subQueryT = "SELECT name FROM PhotoType WHERE \"value\" = " + function.getParameters().getExpressions().get(0).toString(); 
