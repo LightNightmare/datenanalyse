@@ -97,8 +97,8 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 		alias = func.getAlias();
 		predicate.accept(this); //here we traverse the hierarchy-> start!
 		Expression where = stack.pop();
-		//subwhere are the constraints from any subquery that was not im combination with any IN, EXISTS, ALL, ANY...
-		if(subWhere != null){//have to merge it with the est of the access area
+		//subwhere are the constraints from any subquery that was not in combination with any IN, EXISTS, ALL, ANY...
+		if(subWhere != null){//have to merge it with the rest of the access area
 			if(where != null && !(where instanceof BooleanValue)){
 				AndExpression tempAndExpression = new AndExpression(null,null);
 				if(where instanceof Parenthesis || !(where instanceof OrExpression)) tempAndExpression.setLeftExpression(where);
@@ -125,7 +125,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	public AccessArea convertPredicate(Expression predicate){
 		predicate.accept(this); //here we traverse the hierarchy-> start!
 		Expression where = stack.pop();
-		//subwhere are the constraints from any subquery that was not im combination with any IN, EXISTS, ALL, ANY...
+		//subwhere are the constraints from any subquery that was not in combination with any IN, EXISTS, ALL, ANY...
 		if(subWhere != null){//have to merge it with the est of the access area
 			if(where != null && !(where instanceof BooleanValue)){
 				AndExpression tempAndExpression = new AndExpression(null,null);
@@ -222,13 +222,13 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	@Override
 	public void visit(Function function) {//Transform aggregate functions and SDSS special functions
 		String name = function.getName().toLowerCase();
-		if(name.startsWith("dbo.")) name = name.substring(4,name.length());
-		Expression right = null;
-		Expression parent = null;
-		if(!stack.isEmpty()){
-			right = stack.pop();
-			parent = stack.pop();
-		}
+			if(name.startsWith("dbo.")) name = name.substring(4,name.length());
+			Expression right = null;
+			Expression parent = null;
+			if(!stack.isEmpty()){
+				right = stack.pop();
+				parent = stack.pop();
+			}
 		if(name.toLowerCase().startsWith("f")) { //is SDSS special function
 			Float ra1 = null;
 			Float ra2 = null;
@@ -307,6 +307,33 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 				//case	"flambdafromeq": 	//http://www.sdss3.org/dr10/software/idlutils_doc.php#EQ2CSURVEY -> Appears ONLY in SELECT as flambdafromeq(ra,dec), no numbers given
 										 	//Calculation: lambda= r2d*asin(cos(dec*d2r)*sin((ra-racen)*d2r)) where r2d= 180.0D/(!DPI) and d2r= 1.D/r2d and racen = RA of center
 				//	break;
+				case	"fgetobjfromrect"://Returns a table of objects inside a rectangle defined by two ra,dec pairs. Note the order of the parameters: @ra1, @ra2, @dec1, @dec2 
+											//This is the same as fgetobjfromrecteq expect for the order of parameters!
+											//Both can be converted to select * from PhotoPrimary where ra between 185 and 185.1 and dec between 0 and 0.1
+											//Both occur only a total of 7 times more than once in one query. Therefore we leave the handling of multiple occurrences for now
+					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
+					dec2 = Float.parseFloat(function.getParameters().getExpressions().get(3).toString());
+					//System.out.println(ra2);
+					if(ra2 == null) ra2 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());					
+					if(dec1 == null) dec1 = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
+					String subQueryR2 = "SELECT * FROM PhotoPrimary as "+alias+" where "+alias+".ra between "+ra1+" and "+ra2+" and "+alias+".dec between "+dec1+" and "+dec2;
+					try { //Photoflags table never used in SDSS log, therefore no need to check for multiple occurrences
+						stack.push(parent);
+						Statement stmt = CCJSqlParserUtil.parse(subQueryR2);
+						Select selectStatement = (Select) stmt;
+						SubSelect subSelect = new SubSelect();
+						subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+						subSelect.accept((ExpressionVisitor)this);
+						if(right != null) right.accept(this);
+						else stack.pop();
+					} catch (JSQLParserException e) {
+					//System.out.println("Could not parse Subquery from function: "+function);
+					//e.printStackTrace();
+					}		
+					break;
+					//case	"flambdafromeq": 	//http://www.sdss3.org/dr10/software/idlutils_doc.php#EQ2CSURVEY -> Appears ONLY in SELECT as flambdafromeq(ra,dec), no numbers given
+									 	//Calculation: lambda= r2d*asin(cos(dec*d2r)*sin((ra-racen)*d2r)) where r2d= 180.0D/(!DPI) and d2r= 1.D/r2d and racen = RA of center
+					//	break;
 				case	"fphotoflags":		//fPhotoFlags('[...]') where [...] is some String can always be rewritten as "SELECT value FROM PhotoFlags WHERE name = '[...]'"
 					String subQuery = "SELECT \"PhotoFlags.value\" FROM PhotoFlags WHERE PhotoFlags.name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
 					if (fPhotoFlags == 0)
