@@ -91,6 +91,9 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	private Expression subWhere;
 	private int fPhotoFlags = 0;
 	private int fPrimTarget = 0;
+	private int fPhotoStatus = 0;
+	private int fPhotoType = 0;
+	
 	
 	private String alias = "";
 	public AccessArea convertPredicate(FunctionItem func){
@@ -290,10 +293,10 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//System.out.println(ra2);
 					if(ra2 == null) ra2 = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());					
 					if(dec1 == null) dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
-					String subQueryR = "SELECT * FROM PhotoPrimary as "+alias+" where "+alias+".ra between "+ra1+" and "+ra2+" and "+alias+".dec between "+dec1+" and "+dec2;
+					String subQueryR1 = "SELECT * FROM PhotoPrimary as "+alias+" where "+alias+".ra between "+ra1+" and "+ra2+" and "+alias+".dec between "+dec1+" and "+dec2;
 					try { //Photoflags table never used in SDSS log, therefore no need to check for multiple occurrences
 						stack.push(parent);
-						Statement stmt = CCJSqlParserUtil.parse(subQueryR);
+						Statement stmt = CCJSqlParserUtil.parse(subQueryR1);
 						Select selectStatement = (Select) stmt;
 						SubSelect subSelect = new SubSelect();
 						subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
@@ -400,6 +403,94 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 							fPrimTarget++;
 							stack.push(parent); 
 							Statement stmt = CCJSqlParserUtil.parse(subQueryR3);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							subSelect.accept((ExpressionVisitor)this);
+							stack.pop();
+							stack.pop();
+							if(parent!=null) {
+								stack.push(new BooleanValue(true));
+								stack.push(new BooleanValue(true));	
+								if(right != null) {
+									right.accept(this);
+									stack.pop();								
+								}
+							}
+							stack.push(new BooleanValue(true));
+						} catch (Exception e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					}
+					break;
+
+				case	"fphotostatus":		//fphotostatus('[...]') where [...] is some String can always be rewritten as "SELECT value FROM PhotoFlags WHERE name = '[...]'"
+					String subQueryR4 = "SELECT \"PhotoStatus.value\" FROM PhotoStatus WHERE PhotoStatus.name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+					if (fPhotoStatus == 0)
+						try { //PhotoStatus table never used in SDSS log, therefore no need to check for multiple occurrences //Problem: function used multiple times in some queries
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR4);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							fPhotoStatus++;
+							subSelect.accept((ExpressionVisitor)this);
+							right.accept(this);
+						} catch (JSQLParserException e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					else {
+						try {
+							subQuery = "SELECT \"PhotoStatus"+fPhotoStatus+".value\" FROM PhotoStatus as PhotoStatus"+fPhotoStatus+" WHERE PhotoStatus"+fPhotoStatus+".name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+							fPhotoStatus++;
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR4);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							subSelect.accept((ExpressionVisitor)this);
+							stack.pop();
+							stack.pop();
+							if(parent!=null) {
+								stack.push(new BooleanValue(true));
+								stack.push(new BooleanValue(true));	
+								if(right != null) {
+									right.accept(this);
+									stack.pop();								
+								}
+							}
+							stack.push(new BooleanValue(true));
+						} catch (Exception e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					}
+					break;
+
+				case	"fphototype":		//fphototype('[...]') where [...] is some String can always be rewritten as "SELECT value FROM PhotoFlags WHERE name = '[...]'"
+					String subQueryR5 = "SELECT \"PhotoType.value\" FROM PhotoType WHERE PhotoType.name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+					if (fPhotoType == 0)
+						try { //PhotoType table never used in SDSS log, therefore no need to check for multiple occurrences //Problem: function used multiple times in some queries
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR5);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							fPhotoType++;
+							subSelect.accept((ExpressionVisitor)this);
+							right.accept(this);
+						} catch (JSQLParserException e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					else {
+						try {
+							subQuery = "SELECT \"PhotoType"+fPhotoType+".value\" FROM PhotoType as PhotoType"+fPhotoType+" WHERE PhotoType"+fPhotoType+".name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+							fPhotoType++;
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR5);
 							Select selectStatement = (Select) stmt;
 							SubSelect subSelect = new SubSelect();
 							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
