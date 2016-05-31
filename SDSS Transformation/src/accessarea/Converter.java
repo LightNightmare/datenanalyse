@@ -93,6 +93,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	private int fPrimTarget = 0;
 	private int fPhotoStatus = 0;
 	private int fPhotoType = 0;
+	final double square_two = 0.707106781;
 	
 	
 	private String alias = "";
@@ -276,9 +277,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 											//Only 49 times occurs more than once in a query, therefore multiple occurrences not handled yet
 					if(ObjectTable == null) ObjectTable = "PhotoObjPrimary"; //Only SuperSet
 					
-				case	"fgetnearbyobjeq":		//Returns a table of primary objects within @r arcmins of the point. There is no limit on @r.
-												//Only 370 times occurs more than once in a query, therefore not handled
-					if(ObjectTable == null) ObjectTable = "PhotoObjPrimary"; //Only SuperSet
 					
 				case	"fgetnearbyspecobjalleq":	//Returns a table of spectrum objects within @r arcmins of an equatorial point (@ra, @dec). (Primary, Secondary, other)
 													//Never occurs more than once in a query, therefore not handled
@@ -338,6 +336,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//case	"flambdafromeq": 	//http://www.sdss3.org/dr10/software/idlutils_doc.php#EQ2CSURVEY -> Appears ONLY in SELECT as flambdafromeq(ra,dec), no numbers given
 									 	//Calculation: lambda= r2d*asin(cos(dec*d2r)*sin((ra-racen)*d2r)) where r2d= 180.0D/(!DPI) and d2r= 1.D/r2d and racen = RA of center
 					//	break;
+				
 				case	"fphotoflags":		//fPhotoFlags('[...]') where [...] is some String can always be rewritten as "SELECT value FROM PhotoFlags WHERE name = '[...]'"
 					String subQuery = "SELECT \"PhotoFlags.value\" FROM PhotoFlags WHERE PhotoFlags.name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
 					if (fPhotoFlags == 0)
@@ -512,6 +511,29 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 						}
 					}
 					break;
+
+				case	"fgetnearbyobjeq"://Given an equatorial point (@ra,@dec), returns table of primary objects within @r arcmins of the point. There is no limit on @r.
+					// Example select * from Galaxy as G, dbo.fGetNearbyObjEq(185,0,.3) as N where G.objID = N.objID 
+					//Can be converted to select * from Galaxy where ra between 185-(.3/2^.5) and 185+(.3/2^.5) and dec between 0-(.3/2^.5) and 0 + (.3/2^.5)
+					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
+					dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
+					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
+					String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+(ra1-(r*square_two))+" and "+(ra1+(r*square_two))+" and PhotoObjAll.dec between "+(dec1-(r*square_two))+" and "+(dec1+(r*square_two))+" and mode = 1";
+					//System.out.println("SubQueryR6: "+subQueryR6);
+					try {
+						stack.push(parent);
+						Statement stmt = CCJSqlParserUtil.parse(subQueryR6);
+						Select selectStatement = (Select) stmt;
+						SubSelect subSelect = new SubSelect();
+						subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+						subSelect.accept((ExpressionVisitor)this);
+						if(right != null) right.accept(this);
+						else stack.pop();
+					} catch (JSQLParserException e) {
+					//System.out.println("Could not parse Subquery from function: "+function);
+					//e.printStackTrace();
+					}		
+					break;										
 				case	"fphototypen":		//Returns the PhotoType name, indexed by value (3-> Galaxy, 6-> Star,...) 
 											//Can be rewritten as "select name from PhotoType where value = [...]" where [...] is the Parameter of the function
 					String subQueryT = "SELECT name FROM PhotoType WHERE \"value\" = " + function.getParameters().getExpressions().get(0).toString(); 
