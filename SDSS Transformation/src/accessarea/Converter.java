@@ -4,6 +4,7 @@
  */
 package accessarea;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -93,7 +94,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	private int fPrimTarget = 0;
 	private int fPhotoStatus = 0;
 	private int fPhotoType = 0;
-	final double r_conversion = 0.011785113;
 	
 	
 	private String alias = "";
@@ -240,6 +240,11 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 			Float dec1 = null;
 			Float dec2 = null;
 			Float r = null;
+			Double rRangeMin = null;
+			Double rRangeMax = null;
+			Double rRange = null;
+			Double threshold = null;
+		
 			String ObjectTable = null;
 			switch (name) {
 				//case	"fdistanceeq": 		//returns distance (arcmins) between two points (ra1,dec1) and (ra2,dec2), usually used with attribute as parameter, needs to be calculated for each value pair
@@ -519,7 +524,14 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
 					dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
 					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+(ra1-(r*r_conversion))+" and "+(ra1+(r*r_conversion))+" and PhotoObjAll.dec between "+(dec1-(r*r_conversion))+" and "+(dec1+(r*r_conversion))+" and mode = 1";
+					rRange = (r/60)/(Math.cos(Math.abs(dec1)));
+					rRangeMin= ra1 - rRange;
+					rRangeMax= ra1 + rRange;
+					//threshold= 4*Math.pow(Math.sin(Math.toRadians((r/60)/2)),2);
+					//String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+(ra1-(r*r_conversion))+" and "+(ra1+(r*r_conversion))+" and PhotoObjAll.dec between "+(dec1-(r*r_conversion))+" and "+(dec1+(r*r_conversion))+" and mode = 1";
+					String subQueryR6 = "SELECT * FROM PhotoObjAll  where ra between "+ rRangeMin +" and "+ rRangeMax+ " and dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+							+ " and mode = 1 ";
+							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
 					//System.out.println("SubQueryR6: "+subQueryR6);
 					try {
 						stack.push(parent);
