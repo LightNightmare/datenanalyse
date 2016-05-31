@@ -93,7 +93,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	private int fPrimTarget = 0;
 	private int fPhotoStatus = 0;
 	private int fPhotoType = 0;
-	final double square_two = 0.707106781;
+	final double r_conversion = 0.011785113;
 	
 	
 	private String alias = "";
@@ -513,12 +513,13 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					break;
 
 				case	"fgetnearbyobjeq"://Given an equatorial point (@ra,@dec), returns table of primary objects within @r arcmins of the point. There is no limit on @r.
-					// Example select * from Galaxy as G, dbo.fGetNearbyObjEq(185,0,.3) as N where G.objID = N.objID 
-					//Can be converted to select * from Galaxy where ra between 185-(.3/2^.5) and 185+(.3/2^.5) and dec between 0-(.3/2^.5) and 0 + (.3/2^.5)
+					// Need to consider that r is given in arc/minutes With the approach we have we divide r/(60*(2^.5))
+					// Example select * from dbo.fGetNearbyObjEq(185,0,.3) 
+					//Can be converted to select * from PhotoObjAll where ra between 185-(.3/(60*(2^.5))) and 185+(.3/(60*(2^.5))) and dec between 0-(.3/(60*(2^.5))) and 0 + (.3/(60*(2^.5)))
 					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
 					dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
 					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+(ra1-(r*square_two))+" and "+(ra1+(r*square_two))+" and PhotoObjAll.dec between "+(dec1-(r*square_two))+" and "+(dec1+(r*square_two))+" and mode = 1";
+					String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+(ra1-(r*r_conversion))+" and "+(ra1+(r*r_conversion))+" and PhotoObjAll.dec between "+(dec1-(r*r_conversion))+" and "+(dec1+(r*r_conversion))+" and mode = 1";
 					//System.out.println("SubQueryR6: "+subQueryR6);
 					try {
 						stack.push(parent);
