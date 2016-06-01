@@ -94,6 +94,8 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 	private int fPrimTarget = 0;
 	private int fPhotoStatus = 0;
 	private int fPhotoType = 0;
+	private int fCoordType = 0;
+	
 	
 	
 	private String alias = "";
@@ -244,7 +246,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 			Double rRangeMax = null;
 			Double rRange = null;
 			Double threshold = null;
-		
 			String ObjectTable = null;
 			switch (name) {
 				//case	"fdistanceeq": 		//returns distance (arcmins) between two points (ra1,dec1) and (ra2,dec2), usually used with attribute as parameter, needs to be calculated for each value pair
@@ -275,13 +276,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 												//Only 1 time occurs more than once in a query, therefore not handled
 												//Rewritten as SuperSet: SELECT * FROM PhotoObjAll where ra between 185-0.05 and 185+0.05 and dec between -0.05 and 0.05
 					if(ObjectTable == null) ObjectTable = "PhotoObjAll";
-					
-				case	"fgetnearestobjeq":	//Returns a table holding a record describing the closest primary object within @r arcminutes of (@ra,@dec). 
-											//Returns a table with a single row!
-											//But accesses the same objects as fgetnearbyobjeq -> only orders the list by distance and outputs only top 1
-											//Only 49 times occurs more than once in a query, therefore multiple occurrences not handled yet
-					if(ObjectTable == null) ObjectTable = "PhotoObjPrimary"; //Only SuperSet
-					
 					
 				case	"fgetnearbyspecobjalleq":	//Returns a table of spectrum objects within @r arcmins of an equatorial point (@ra, @dec). (Primary, Secondary, other)
 													//Never occurs more than once in a query, therefore not handled
@@ -515,10 +509,9 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 							//e.printStackTrace();
 						}
 					}
-					break;
-
-				case	"fgetnearbyobjeq"://Given an equatorial point (@ra,@dec), returns table of primary objects within @r arcmins of the point. There is no limit on @r.
-					// Need to consider that r is given in arc/minutes With the approach we have we divide r/(60*(2^.5))
+					break;	
+				case	"fgetnearbyobjeq"://Returns table holding a record describing the closest primary object within @r arcminutes of (@ra,@dec)
+					// Need to consider that r is given in arc/minutes we have to divide r/(60)
 					// Example select * from dbo.fGetNearbyObjEq(185,0,.3) 
 					//Can be converted to select * from PhotoObjAll where ra between 185-(.3/(60*(2^.5))) and 185+(.3/(60*(2^.5))) and dec between 0-(.3/(60*(2^.5))) and 0 + (.3/(60*(2^.5)))
 					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
@@ -529,8 +522,8 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					rRangeMax= ra1 + rRange;
 					//threshold= 4*Math.pow(Math.sin(Math.toRadians((r/60)/2)),2);
 					//String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+(ra1-(r*r_conversion))+" and "+(ra1+(r*r_conversion))+" and PhotoObjAll.dec between "+(dec1-(r*r_conversion))+" and "+(dec1+(r*r_conversion))+" and mode = 1";
-					String subQueryR6 = "SELECT * FROM PhotoObjAll  where ra between "+ rRangeMin +" and "+ rRangeMax+ " and dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
-							+ " and mode = 1 ";
+					String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+ rRangeMin +" and "+ rRangeMax+ " and PhotoObjAll.dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+							+ " and PhotoObjAll.mode = 1 ";
 							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
 					//System.out.println("SubQueryR6: "+subQueryR6);
 					try {
@@ -546,7 +539,84 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//System.out.println("Could not parse Subquery from function: "+function);
 					//e.printStackTrace();
 					}		
-					break;										
+					break;	
+				case	"fgetnearestobjeq"://Given an equatorial point (@ra,@dec), returns table of primary objects within @r arcmins of the point. There is no limit on @r.
+					// Need to consider that r is given in arc/minutes we have to divide r/(60)
+					// select * from dbo.fgetnearestobjeq(185,0,1)
+					//select top 1 objID, run, camcol, field,	rerun, type, cx, cy, cz, htmID, 
+					//DEGREES(2*ASIN(SQRT(POWER(cx-COS(185*asin(1)*2/180) * COS(0*asin(1)*2/180),2)+POWER(cy-SIN(185*asin(1)*2/180) * COS(0*asin(1)*2/180),2)+POWER(cz-SIN(0*asin(1)*2/180),2))/2))*60 as distance 
+					//from PhotoObjAll where PhotoObjAll.dec >= -0.0166666667 AND PhotoObjAll.dec <= 0.0166666667 AND PhotoObjAll.ra >= 184.9832188617 AND PhotoObjAll.ra <= 185.0167811383 AND mode = 1
+					//ORDER BY distance ASC
+					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
+					dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
+					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
+					rRange = (r/60)/(Math.cos(Math.abs(dec1)));
+					rRangeMin= ra1 - rRange;
+					rRangeMax= ra1 + rRange;
+					//threshold= 4*Math.pow(Math.sin(Math.toRadians((r/60)/2)),2);
+					String subQueryR7 = "select top 1 objID, run, camcol, field,	rerun, type, cx, cy, cz, htmID, "
+							+ "DEGREES(2*ASIN(SQRT(POWER(cx-COS("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cy-SIN("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cz-SIN("+dec1+"*asin(1)*2/180),2))/2))*60 as distance " 
+							+ "FROM PhotoObjAll  where PhotoObjAll.ra between "+ rRangeMin +" and "+ rRangeMax+ " and PhotoObjAll.dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+							+ " and PhotoObjAll.mode = 1 ";
+							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
+					//System.out.println("SubQueryR7: "+subQueryR7);
+					try {
+						stack.push(parent);
+						Statement stmt = CCJSqlParserUtil.parse(subQueryR7);
+						Select selectStatement = (Select) stmt;
+						SubSelect subSelect = new SubSelect();
+						subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+						subSelect.accept((ExpressionVisitor)this);
+						if(right != null) right.accept(this);
+						else stack.pop();
+					} catch (JSQLParserException e) {
+					//System.out.println("Could not parse Subquery from function: "+function);
+					//e.printStackTrace();
+					}		
+					break;	
+				case	"fcoordtype":		//fcoordtype('[...]') where [...] is some String can always be rewritten as "SELECT value FROM CoordType WHERE name = '[...]'"
+					String subQueryR8 = "SELECT \"CoordType.value\" FROM CoordType WHERE CoordType.name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+					if (fCoordType == 0)
+						try { //PhotoType table never used in SDSS log, therefore no need to check for multiple occurrences //Problem: function used multiple times in some queries
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR8);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							fPhotoType++;
+							subSelect.accept((ExpressionVisitor)this);
+							right.accept(this);
+						} catch (JSQLParserException e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					else {
+						try {
+							subQuery = "SELECT \"CoordType"+fCoordType+".value\" FROM CoordType as CoordType"+fCoordType+" WHERE CoordType"+fCoordType+".name = " + function.getParameters().getExpressions().get(0).toString(); //need " around value since it else could not be parsed (reserved expression)
+							fCoordType++;
+							stack.push(parent); 
+							Statement stmt = CCJSqlParserUtil.parse(subQueryR8);
+							Select selectStatement = (Select) stmt;
+							SubSelect subSelect = new SubSelect();
+							subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
+							subSelect.accept((ExpressionVisitor)this);
+							stack.pop();
+							stack.pop();
+							if(parent!=null) {
+								stack.push(new BooleanValue(true));
+								stack.push(new BooleanValue(true));	
+								if(right != null) {
+									right.accept(this);
+									stack.pop();								
+								}
+							}
+							stack.push(new BooleanValue(true));
+						} catch (Exception e) {
+							//System.out.println("Could not parse Subquery from function: "+function);
+							//e.printStackTrace();
+						}
+					}
+					break;					
 				case	"fphototypen":		//Returns the PhotoType name, indexed by value (3-> Galaxy, 6-> Star,...) 
 											//Can be rewritten as "select name from PhotoType where value = [...]" where [...] is the Parameter of the function
 					String subQueryT = "SELECT name FROM PhotoType WHERE \"value\" = " + function.getParameters().getExpressions().get(0).toString(); 
