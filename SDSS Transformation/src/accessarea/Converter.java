@@ -647,18 +647,19 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					float racenter = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
 					float deccenter = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
 					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					rRange = (double) r;// (r/60)/(Math.cos(Math.abs(dec1)));
-					ra1 = (float) (racenter - rRange/2);
-					dec1 = (float) (deccenter + rRange/2);
-					ra2 = (float) (racenter + rRange/2);
-					dec2 = (float) (racenter - rRange/2);
+					rRange = (r/60)/(Math.cos(Math.abs(deccenter)));
+					rRangeMin= racenter - rRange;
+					rRangeMax= racenter + rRange;
+					dec1 = (float) (deccenter + r/60);
+					dec2 = (float) (deccenter - r/60);
 					zoom = Integer.parseInt(function.getParameters().getExpressions().get(3).toString());
 					System.out.println("Alias= "+ alias);
 					String subQueryR9 = "SELECT fieldID, a, b, c, d, e, f, node, incl, distance "
 					                                        +"FROM Frame as "+alias+" where "
-					                                        +alias+".ra between "+ra1+" and "+ra2+" and "
-					                                        +alias+".dec between "+dec1+" and "+dec2+" and "
+					                                        +alias+".ra between "+rRangeMin+" and "+rRangeMax+" and "
+					                                        +alias+".dec between "+Math.min(dec2, dec1)+" and "+Math.max(dec2, dec1)+" and "
 					                                        +alias+".zoom = "+zoom;
+					System.out.println(subQueryR9);
 					try {
 					        stack.push(parent);
 					        Statement stmt = CCJSqlParserUtil.parse(subQueryR9);
