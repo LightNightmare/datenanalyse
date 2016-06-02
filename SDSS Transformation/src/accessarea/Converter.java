@@ -247,6 +247,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 			Double rRange = null;
 			Double threshold = null;
 			String ObjectTable = null;
+			int zoom = -1;
 			switch (name) {
 				//case	"fdistanceeq": 		//returns distance (arcmins) between two points (ra1,dec1) and (ra2,dec2), usually used with attribute as parameter, needs to be calculated for each value pair
 											// only 105 times in FROM OR WHERE PART, else in SELECT
