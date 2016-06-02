@@ -526,7 +526,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//String subQueryR6 = "SELECT * FROM PhotoObjAll  where PhotoObjAll.ra between "+ rRangeMin +" and "+ rRangeMax+ " and PhotoObjAll.dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
 					//		+ " and PhotoObjAll.mode = 1 ";
 							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
-					//System.out.println("SubQueryR6: "+subQueryR6);
+					
 					if(alias == null) alias = "n";
 					String subQueryR6 = "SELECT * FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ rRangeMin +" and "+ rRangeMax+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
 							+ " and "+alias+".mode = 1 ";
