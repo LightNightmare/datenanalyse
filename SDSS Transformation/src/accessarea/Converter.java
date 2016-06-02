@@ -307,7 +307,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					break;
 				//case	"flambdafromeq": 	//http://www.sdss3.org/dr10/software/idlutils_doc.php#EQ2CSURVEY -> Appears ONLY in SELECT as flambdafromeq(ra,dec), no numbers given
 										 	//Calculation: lambda= r2d*asin(cos(dec*d2r)*sin((ra-racen)*d2r)) where r2d= 180.0D/(!DPI) and d2r= 1.D/r2d and racen = RA of center
-				//	break;
+				//	break;//
 				case	"fgetobjfromrect"://Returns a table of objects inside a rectangle defined by two ra,dec pairs. Note the order of the parameters: @ra1, @ra2, @dec1, @dec2 
 											//This is the same as fgetobjfromrecteq expect for the order of parameters!
 											//Both can be converted to select * from PhotoPrimary where ra between 185 and 185.1 and dec between 0 and 0.1
