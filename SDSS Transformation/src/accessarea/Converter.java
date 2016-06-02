@@ -247,7 +247,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 			Double rRange = null;
 			Double threshold = null;
 			String ObjectTable = null;
-			int zoom = -1;
 			switch (name) {
 				//case	"fdistanceeq": 		//returns distance (arcmins) between two points (ra1,dec1) and (ra2,dec2), usually used with attribute as parameter, needs to be calculated for each value pair
 											// only 105 times in FROM OR WHERE PART, else in SELECT
@@ -318,7 +317,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//System.out.println(ra2);
 					if(ra2 == null) ra2 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());					
 					if(dec1 == null) dec1 = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					System.out.println("Alias= "+ alias);
 					String subQueryR2 = "SELECT * FROM PhotoPrimary as "+alias+" where "+alias+".ra between "+ra1+" and "+ra2+" and "+alias+".dec between "+dec1+" and "+dec2;
 					try { //Photoflags table never used in SDSS log, therefore no need to check for multiple occurrences
 						stack.push(parent);
@@ -528,7 +526,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//		+ " and PhotoObjAll.mode = 1 ";
 							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
 					//System.out.println("SubQueryR6: "+subQueryR6);
-					System.out.println("Alias= "+ alias);
+					if(alias == null) alias = "n";
 					String subQueryR6 = "SELECT * FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ rRangeMin +" and "+ rRangeMax+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
 							+ " and "+alias+".mode = 1 ";
 					try {
@@ -559,17 +557,16 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					rRangeMin= ra1 - rRange;
 					rRangeMax= ra1 + rRange;
 					//threshold= 4*Math.pow(Math.sin(Math.toRadians((r/60)/2)),2);
-					String subQueryR7 = "select top 1 objID, run, camcol, field,	rerun, type, cx, cy, cz, htmID, "
-							+ "DEGREES(2*ASIN(SQRT(POWER(cx-COS("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cy-SIN("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cz-SIN("+dec1+"*asin(1)*2/180),2))/2))*60 as distance " 
-							+ "FROM PhotoObjAll  where PhotoObjAll.ra between "+ rRangeMin +" and "+ rRangeMax+ " and PhotoObjAll.dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
-							+ " and PhotoObjAll.mode = 1 ";
-							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
-					//System.out.println("SubQueryR7: "+subQueryR7);
-					
 					//String subQueryR7 = "select top 1 objID, run, camcol, field,	rerun, type, cx, cy, cz, htmID, "
 					//		+ "DEGREES(2*ASIN(SQRT(POWER(cx-COS("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cy-SIN("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cz-SIN("+dec1+"*asin(1)*2/180),2))/2))*60 as distance " 
-					//		+ "FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ rRangeMin +" and "+ rRangeMax+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
-					//		+ " and "+alias+".mode = 1 ";
+					//		+ "FROM PhotoObjAll  where PhotoObjAll.ra between "+ rRangeMin +" and "+ rRangeMax+ " and PhotoObjAll.dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+					//		+ " and PhotoObjAll.mode = 1 ";
+							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
+					if(alias == null) alias = "n";
+					String subQueryR7 = "select top 1 objID, run, camcol, field,	rerun, type, cx, cy, cz, htmID, "
+							+ "DEGREES(2*ASIN(SQRT(POWER(cx-COS("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cy-SIN("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cz-SIN("+dec1+"*asin(1)*2/180),2))/2))*60 as distance " 
+							+ "FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ rRangeMin +" and "+ rRangeMax+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+							+ " and "+alias+".mode = 1 ";
 					
 					try {
 						stack.push(parent);
@@ -645,35 +642,6 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 						//e.printStackTrace();
 					}
 					break;
-				case	"fgetnearbyframeeq":
-					float racenter = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
-					float deccenter = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
-					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					rRange = (double) r;// (r/60)/(Math.cos(Math.abs(dec1)));
-					ra1 = (float) (racenter - rRange/2);
-					dec1 = (float) (deccenter + rRange/2);
-					ra2 = (float) (racenter + rRange/2);
-					dec2 = (float) (racenter - rRange/2);
-					zoom = Integer.parseInt(function.getParameters().getExpressions().get(3).toString());
-					System.out.println("Alias= "+ alias);
-					String subQueryR9 = "SELECT fieldID, a, b, c, d, e, f, node, incl, distance "
-										+"FROM Frame as "+alias+" where "
-										+alias+".ra between "+ra1+" and "+ra2+" and "
-										+alias+".dec between "+dec1+" and "+dec2+" and "
-										+alias+".zoom = "+zoom;
-					try {
-						stack.push(parent);
-						Statement stmt = CCJSqlParserUtil.parse(subQueryR9);
-						Select selectStatement = (Select) stmt;
-						SubSelect subSelect = new SubSelect();
-						subSelect.setSelectBody((PlainSelect) selectStatement.getSelectBody());
-						subSelect.accept((ExpressionVisitor)this);
-						if(right != null) right.accept(this);
-						else stack.pop();
-					} catch (JSQLParserException e) {
-						//System.out.println("Could not parse Subquery from function: "+function);
-						//e.printStackTrace();
-					}		
 				default:
 					if(parent!=null) {
 						stack.push(null);
