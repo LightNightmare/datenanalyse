@@ -653,13 +653,11 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					dec1 = (float) (deccenter + r/60);
 					dec2 = (float) (deccenter - r/60);
 					zoom = Integer.parseInt(function.getParameters().getExpressions().get(3).toString());
-					System.out.println("Alias= "+ alias);
 					String subQueryR9 = "SELECT fieldID, a, b, c, d, e, f, node, incl, distance "
 					                                        +"FROM Frame as "+alias+" where "
 					                                        +alias+".ra between "+rRangeMin+" and "+rRangeMax+" and "
 					                                        +alias+".dec between "+Math.min(dec2, dec1)+" and "+Math.max(dec2, dec1)+" and "
 					                                        +alias+".zoom = "+zoom;
-					System.out.println(subQueryR9);
 					try {
 					        stack.push(parent);
 					        Statement stmt = CCJSqlParserUtil.parse(subQueryR9);
