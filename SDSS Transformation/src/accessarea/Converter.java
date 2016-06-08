@@ -291,7 +291,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					//System.out.println(ra2);
 					if(ra2 == null) ra2 = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());					
 					if(dec1 == null) dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
-					String subQueryR1 = "SELECT * FROM PhotoPrimary as "+alias+" where "+alias+".ra between "+ra1+" and "+ra2+" and "+alias+".dec between "+dec1+" and "+dec2;
+					String subQueryR1 = "SELECT * FROM PhotoPrimary as "+alias+" where "+alias+".ra between "+Math.min(ra1, ra2)+" and "+Math.max(ra1, ra2)+" and "+alias+".dec between "+Math.min(dec1, dec2)+" and "+Math.max(dec1, dec2);
 					try { //Photoflags table never used in SDSS log, therefore no need to check for multiple occurrences
 						stack.push(parent);
 						Statement stmt = CCJSqlParserUtil.parse(subQueryR1);
@@ -528,7 +528,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 							//+ "and "+threshold+"> (power(cx-(" + Math.cos(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cy-("+ Math.sin(Math.toRadians(ra1))*Math.cos(Math.toRadians(dec1)) + "),2) + power(cz-(" + Math.sin(Math.toRadians(dec1)) +"),2))";
 					
 					if(alias == null) alias = "n";
-					String subQueryR6 = "SELECT * FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ rRangeMin +" and "+ rRangeMax+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+					String subQueryR6 = "SELECT * FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ Math.min(rRangeMin, rRangeMax) +" and "+ Math.max(rRangeMin, rRangeMax)+ " and "+alias+".dec between "+Math.min((dec1-(r/60)), (dec1+(r/60)))+" and "+Math.max((dec1-(r/60)), (dec1+(r/60)))
 							+ " and "+alias+".mode = 1 ";
 					try {
 						stack.push(parent);
@@ -566,7 +566,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					if(alias == null) alias = "n";
 					String subQueryR7 = "select top 1 objID, run, camcol, field,	rerun, type, cx, cy, cz, htmID, "
 							+ "DEGREES(2*ASIN(SQRT(POWER(cx-COS("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cy-SIN("+ra1+"*asin(1)*2/180) * COS("+dec1+"*asin(1)*2/180),2)+POWER(cz-SIN("+dec1+"*asin(1)*2/180),2))/2))*60 as distance " 
-							+ "FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ rRangeMin +" and "+ rRangeMax+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
+							+ "FROM PhotoObjAll as "+alias+" where "+alias+".ra between "+ Math.min(rRangeMin, rRangeMax) +" and "+ Math.max(rRangeMin, rRangeMax)+ " and "+alias+".dec between "+(dec1-(r/60))+" and "+(dec1+(r/60))
 							+ " and "+alias+".mode = 1 ";
 					
 					try {
@@ -655,7 +655,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					zoom = Integer.parseInt(function.getParameters().getExpressions().get(3).toString());
 					String subQueryR9 = "SELECT fieldID, a, b, c, d, e, f, node, incl, distance "
 					                                        +"FROM Frame as "+alias+" where "
-					                                        +alias+".ra between "+rRangeMin+" and "+rRangeMax+" and "
+					                                        +alias+".ra between "+Math.min(rRangeMin, rRangeMax)+" and "+Math.max(rRangeMin, rRangeMax)+" and "
 					                                        +alias+".dec between "+Math.min(dec2, dec1)+" and "+Math.max(dec2, dec1)+" and "
 					                                        +alias+".zoom = "+zoom;
 					try {
