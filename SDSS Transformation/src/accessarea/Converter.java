@@ -518,7 +518,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
 					dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
 					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					rRange = (r/60)/(Math.cos(Math.abs(dec1)));
+					rRange = (r/60)/(Math.cos(Math.abs(dec1*Math.PI/180)));
 					rRangeMin= ra1 - rRange;
 					rRangeMax= ra1 + rRange;
 					//threshold= 4*Math.pow(Math.sin(Math.toRadians((r/60)/2)),2);
@@ -554,7 +554,7 @@ public class Converter implements SelectVisitor, SelectItemVisitor, FromItemVisi
 					ra1 = Float.parseFloat(function.getParameters().getExpressions().get(0).toString());
 					dec1 = Float.parseFloat(function.getParameters().getExpressions().get(1).toString());
 					r = Float.parseFloat(function.getParameters().getExpressions().get(2).toString());
-					rRange = (r/60)/(Math.cos(Math.abs(dec1)));
+					rRange = (r/60)/(Math.cos(Math.abs(dec1*Math.PI/180)));
 					rRangeMin= ra1 - rRange;
 					rRangeMax= ra1 + rRange;
 					//threshold= 4*Math.pow(Math.sin(Math.toRadians((r/60)/2)),2);
