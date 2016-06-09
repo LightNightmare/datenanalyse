@@ -66,7 +66,7 @@ public final class DBScan {
     	Loader.CalculateQueryCountInEachCluster(opt);
     	
     	Loader.writeTables(opt);
-    	//Loader.writeColumns(opt.FILE_CLMN_OUTPUT, columns, opt);
+    	Loader.writeColumns(opt.FILE_CLMN_OUTPUT, columns, opt);
     }
     
     public static List<Cluster> computeClusters(List<Query> data, List<Query> outliers, Options opt) {
