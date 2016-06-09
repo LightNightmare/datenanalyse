@@ -133,11 +133,13 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
+		        	//if (iLineCount == 2)
+		        	//{
 		            response.append(inputLine);
-		        	}
+		        	//}
 		        	iLineCount++;
+		        	System.out.println(response);
+		        	System.out.println("hi");
 		        }
 		        in.close(); 
 		        
