@@ -211,7 +211,6 @@ public static List<String> listFilesForFolder(final File folder) {
         		{
             		String value = predicate.value;
             		Column c = opt.PENALTY_COLUMNS_DISTRIBUTION.get(columnName);
-            		System.out.println("C value: "+c);
             		if (c != null)
             		{
             			isTrash = true;
@@ -220,7 +219,6 @@ public static List<String> listFilesForFolder(final File folder) {
             		else
             		{
 	            		c = opt.COLUMNS_DISTRIBUTION.get(columnName);
-	            		System.out.println("C column: "+c);
 	            		if (c != null)
 	            		{
 	            			if (c.GlobalColumnType == GlobalColumnType.DictionaryField)
@@ -230,11 +228,9 @@ public static List<String> listFilesForFolder(final File folder) {
 	            		{
 	            			
 	            			long distinctValues = urlcon.sendGetDistinctColumnCount(predicate.table, predicate.column, opt);
-	            			System.out.println("distinct values: "+distinctValues);
 	            			if (distinctValues != -1)
 	            			{
 	                			c = new Column(columnName);
-	                			System.out.println("t.count: "+t.Count);
 	                			if (t.Count == distinctValues)
 	                			{
 	                				// it's identificator field, save as identificator

@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 public class HttpURLConnectionExt {
 	
-	private String baseUrl = "http://skyserver.sdss.org/dr12/en/tools/search/x_sql.aspx";
+	private String baseUrl = "http://skyserver.sdss.org/SkyserverWS/dr12/SearchTools/SqlSearch";
 	private final String USER_AGENT = "Mozilla/5.0";
 	private final int CorrectresponseCode = 200;
 	
@@ -133,13 +133,12 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	//if (iLineCount == 2)
-		        	//{
+		        	if (iLineCount == 2)
+		        	{
 		            response.append(inputLine);
-		        	//}
+		        	}
 		        	iLineCount++;
-		        	System.out.println(response);
-		        	System.out.println("hi");
+		        	
 		        }
 		        in.close(); 
 		        
