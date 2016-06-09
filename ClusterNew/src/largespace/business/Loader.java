@@ -342,7 +342,7 @@ public static List<String> listFilesForFolder(final File folder) {
     	String startPositionPath = opt.FILE_INPUT.replace(".csv", opt.FILE_START_POSITION + ".csv");
     	File f = new File(startPositionPath);
     	if(f.exists() && !f.isDirectory()) { 
-    	    // do something
+    	    // do something... or nothing? On purpose?
     	}
     	else
     	{
