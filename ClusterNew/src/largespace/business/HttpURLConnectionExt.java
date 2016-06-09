@@ -109,8 +109,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
    
         URL obj = new URL(url);
-        try
-        {
+        try {
         	HttpURLConnection.setFollowRedirects(false);
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
@@ -123,44 +122,39 @@ public class HttpURLConnectionExt {
 	        con.setRequestProperty("User-Agent", USER_AGENT);
 	
 	        int responseCode = con.getResponseCode();
+	        System.out.println("DB connection attempt returned code: " + responseCode);
 
-	        if (responseCode == CorrectresponseCode)
-	        {
-		        BufferedReader in = new BufferedReader(
-		                new InputStreamReader(con.getInputStream()));
-		        String inputLine;
-		        StringBuffer response = new StringBuffer();
-		
-		        int iLineCount = 0;
-		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
-		            response.append(inputLine);
-		        	}
-		        	iLineCount++;
-		        }
-		        in.close(); 
-		        
-		        try
-		        {
-		        	String respString = response.toString();
-		        	if (respString.equals(""))
-		        	{
-		        		System.out.println("Didn't have distinct value for column " + columnName + "in table" + tableName);
-		        	}
-		        	else
-		        	{
-				        long foo = Long.parseLong(respString);
-				        distColumnCount = foo;
-		        	}
-		        }
-		        catch(Exception ex)
-		        {
-		        	System.out.println(ex);
-		        }
-	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+			if (responseCode == CorrectresponseCode) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuffer response = new StringBuffer();
+				StringBuffer DEBUG = new StringBuffer();
+
+				int iLineCount = 0;
+				while ((inputLine = in.readLine()) != null) {
+					if (iLineCount == 2) {
+						response.append(inputLine);
+					}
+					DEBUG.append(inputLine);
+					iLineCount++;
+				}
+				in.close();
+				System.out.println("#DEBUG#sendGetDistinctColumnCount\n#response="+response.toString()+"\n#debug="+DEBUG.toString());
+
+				try {
+					String respString = response.toString();
+					if (respString.equals("")) {
+						System.out.println(
+								"Didn't have distinct value for column " + columnName + "in table" + tableName);
+					} else {
+						long foo = Long.parseLong(respString);
+						distColumnCount = foo;
+					}
+				} catch (Exception ex) {
+					System.out.println(ex);
+				}
+			}
+		} catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + tableName + "." + columnName);
      	   //return false;
      	} catch (java.io.IOException e) {

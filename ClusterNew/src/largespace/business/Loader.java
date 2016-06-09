@@ -148,201 +148,179 @@ public static List<String> listFilesForFolder(final File folder) {
 
     public static void Postprocess(Options opt) throws Exception
     {
-            	for (Table t : opt.TABLESWITHCOUNT.values())
-                {
-            		FromCluster resCl = null;
-            		for (FromCluster fromCl : opt.FromClusters)
-            		{
-            			if (fromCl.FromTables.contains(t.Name))
-            			{
-            				// such a table exists in opt.TABLESWITHCOUNT
-            				resCl = fromCl;
-            			}
-            		}
-            		for (String link: t.Links)
-            		{
-            			for (FromCluster fromCl : opt.FromClusters)
-                		{
-                			if (fromCl.FromTables.contains(link))
-                			{
-                				// such a table exists in opt.TABLESWITHCOUNT
-                				resCl = fromCl;
-                			}
-                		}
-            		}
-            		if (resCl == null)
-            		{
-            			resCl = new FromCluster();
-            			resCl.FromTables.add(t.Name);
-            			opt.FromClusters.add(resCl);
-            		}
-            		
-            		for (String link: t.Links)
-            		{
+		for (Table t : opt.TABLESWITHCOUNT.values()) {
+			FromCluster resCl = null;
+			for (FromCluster fromCl : opt.FromClusters) {
+				if (fromCl.FromTables.contains(t.Name)) {
+					// such a table exists in opt.TABLESWITHCOUNT
+					resCl = fromCl;
+				}
+			}
+			for (String link : t.Links) {
+				for (FromCluster fromCl : opt.FromClusters) {
+					if (fromCl.FromTables.contains(link)) {
+						// such a table exists in opt.TABLESWITHCOUNT
+						resCl = fromCl;
+					}
+				}
+			}
+			if (resCl == null) {
+				resCl = new FromCluster();
+				resCl.FromTables.add(t.Name);
+				opt.FromClusters.add(resCl);
+			}
 
-            			if (!resCl.FromTables.contains(link))
-            				resCl.FromTables.add(link);
-            		}
+			for (String link : t.Links) {
 
-                }
+				if (!resCl.FromTables.contains(link))
+					resCl.FromTables.add(link);
+			}
+
+		}
     }
     
     public static Boolean readWhereClause(List<List<Predicate>> wherePart, Options opt, Long lineNumber, Boolean isTrash)
     {
-    	for (List<Predicate> listPredicates: wherePart)
-        {
-        	for (Predicate predicate: listPredicates)
-        	{
-        		try
-        		{
-        		String columnName = predicate.table + "." + predicate.column;
-        		HttpURLConnectionExt urlcon = new HttpURLConnectionExt();
-        		
-        		Table t = null;
-        		if (!opt.TABLESWITHCOUNT.containsKey(predicate.table))
-        		{
-        			t=  urlcon.sendGetTableCount(predicate.table);
-        			opt.TABLESWITHCOUNT.put(predicate.table, t);
-        			writeTables(opt);
-        		}
-        		else
-        			t = opt.TABLESWITHCOUNT.get(predicate.table);
-        		if (opt.TABLESWITHCOUNT.get(predicate.table).Count > 0)
-        		{
-            		String value = predicate.value;
-            		Column c = opt.PENALTY_COLUMNS_DISTRIBUTION.get(columnName);
-            		if (c != null)
-            		{
-            			isTrash = true;
-            			return isTrash;
-            		}
-            		else
-            		{
-	            		c = opt.COLUMNS_DISTRIBUTION.get(columnName);
-	            		if (c != null)
-	            		{
-	            			if (c.GlobalColumnType == GlobalColumnType.DictionaryField)
-	            				((DictionaryField)opt.COLUMNS_DISTRIBUTION.get(columnName).Distribution).AddValue(value);
-	            		}
-	            		else
-	            		{
-	            			
-	            			long distinctValues = urlcon.sendGetDistinctColumnCount(predicate.table, predicate.column, opt);
-	            			if (distinctValues != -1)
-	            			{
-	                			c = new Column(columnName);
-	                			if (t.Count == distinctValues)
-	                			{
-	                				// it's identificator field, save as identificator
-	                				c.GlobalColumnType = GlobalColumnType.Identificator;
-	                				
-	                				List<Long> minMaxvalues = urlcon.sendGetMinMaxColumnFromId(predicate.table, predicate.column);
-	                				if (minMaxvalues.size() != 2)
-	                				{
-	                					System.out.println("Can't get minMaxvalues for " + lineNumber + ": " + lineNumber);
-	                					// it means that this field is not numeric, probably the table isn't big
-	                					if (t.Count <= opt.MAX_DISTINCT_VALUES_TO_BE_DICTIONARY_FIELD)
-		                				{
-		                					c.GlobalColumnType = GlobalColumnType.DictionaryField;
-		                					Column resCol = urlcon.sendGetColumnDistribution(predicate.table, predicate.column, opt);
-		                					c.Distribution = resCol.Distribution;
-		                				}
-	                					else
-	                					{
-	                						urlcon.WritePenaltyColumn(opt, c);
-	                					}
-	                				}
-	                				else
-	                					c.Distribution = new Identificator(minMaxvalues.get(0), minMaxvalues.get(1), distinctValues);
-	                			}
-	                			else
-	                			{
-	                				if (distinctValues <= opt.MAX_DISTINCT_VALUES_TO_BE_DICTIONARY_FIELD)
-	                				{
-	                					c.GlobalColumnType = GlobalColumnType.DictionaryField;
-	                					Column resCol = urlcon.sendGetColumnDistribution(predicate.table, predicate.column, opt);
-	                					c.Distribution = resCol.Distribution;
-	                				}
-	                				else
-	                				{
-	                					// look for Emissions
-	                					Column resCol = urlcon.sendGetColumnEmissions(predicate.table, predicate.column, opt, t);
-	                					if (((DistributedFieldWithEmissions)resCol.Distribution).Values.size() > 0)
-	                					{
-	                						// it's field with emissions;
-	                						c.GlobalColumnType = GlobalColumnType.DistributedFieldWithEmissions;
-	                						c.Distribution = resCol.Distribution;
-	                						Column resCol2 = urlcon.sendGetColumnWithoutEmissions(predicate.table, predicate.column, opt, resCol);
-	                						((DistributedFieldWithEmissions)c.Distribution).MinValue = ((DistributedFieldWithEmissions)resCol2.Distribution).MinValue;
-	                						((DistributedFieldWithEmissions)c.Distribution).MaxValue = ((DistributedFieldWithEmissions)resCol2.Distribution).MaxValue;
-	                					}
-	                					else
-	                					{
-	                						List<Double> minMaxvalues2 = urlcon.sendGetMinMaxColumnFromDistrField(predicate.table, predicate.column);
-			                				if (minMaxvalues2.size() != 2)
-			                				{
-			                					System.out.println("Can't get minMaxvalues for " + lineNumber + ": " + lineNumber);
-			                					urlcon.WritePenaltyColumn(opt, c);
-			                					// it means that this field is not numeric, probably the table isn't big
-			                					///c.GlobalColumnType = GlobalColumnType.DictionaryField;
-			                					///Column resCol = urlcon.sendGetColumnDistribution(predicate.table, predicate.column, opt);
-			                					///c.Distribution = resCol.Distribution;
-			                				}
-			                				else
-			                				{
-			                					c.GlobalColumnType = GlobalColumnType.DistributedField;
-			                					c.Distribution = new DistributedField(minMaxvalues2.get(0), minMaxvalues2.get(1));
-			                				}
-	                					}
-	                				}
-	                			}
-	                			
-	                			opt.COLUMNS_DISTRIBUTION.put(columnName, c);
-	                			writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
-	            			}
-	            			else
-	            			{
-	            				// later
-	            				// TODO: check, whether the column exists
-	            				isTrash = true;
-	            				c = new Column(columnName);
-	            				opt.COLUMNS_DISTRIBUTION.put(columnName, c);
-	            				writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
-	            			}
-	            			try {
-	            				
-	            				//urlcon.sendGet();
-	
-	            			} catch (Exception ex) {
-	            				
-	            				ex.printStackTrace();
-	            				urlcon.WritePenaltyColumn(opt, c);
-	            			}
-	            			// find out the distribution of the column
-	            			
-	            		}
-            		}
-        		}
-        		else
-        		{
-        			isTrash = true;
-        			
-        		}
-        	}
-        	catch (Exception ex)
-        	{
-        		System.out.println("Exception at" + lineNumber + ": " + ex.toString());
-        	}
-        }
-        }
-    	return isTrash;
+		for (List<Predicate> listPredicates : wherePart) {
+			for (Predicate predicate : listPredicates) {
+				try {
+					String columnName = predicate.table + "." + predicate.column;
+					HttpURLConnectionExt urlcon = new HttpURLConnectionExt();
+
+					Table t = null;
+					if (!opt.TABLESWITHCOUNT.containsKey(predicate.table)) {
+						t = urlcon.sendGetTableCount(predicate.table);
+						opt.TABLESWITHCOUNT.put(predicate.table, t);
+						writeTables(opt);
+					} else
+						t = opt.TABLESWITHCOUNT.get(predicate.table);
+					if (opt.TABLESWITHCOUNT.get(predicate.table).Count > 0) {
+						String value = predicate.value;
+						Column c = opt.PENALTY_COLUMNS_DISTRIBUTION.get(columnName);
+						if (c != null) {
+							isTrash = true;
+							return isTrash;
+						} else {
+							c = opt.COLUMNS_DISTRIBUTION.get(columnName);
+							if (c != null) {
+								if (c.GlobalColumnType == GlobalColumnType.DictionaryField) //Add the current value to the dictionary
+									((DictionaryField) opt.COLUMNS_DISTRIBUTION.get(columnName).Distribution)
+											.AddValue(value);
+							} else {
+
+								long distinctValues = urlcon.sendGetDistinctColumnCount(predicate.table,
+										predicate.column, opt);
+								if (distinctValues != -1) {
+									c = new Column(columnName);
+									if (t.Count == distinctValues) {
+										// it's identificator field, save as
+										// identificator
+										c.GlobalColumnType = GlobalColumnType.Identificator;
+
+										List<Long> minMaxvalues = urlcon.sendGetMinMaxColumnFromId(predicate.table,
+												predicate.column);
+										if (minMaxvalues.size() != 2) {
+											System.out.println(
+													"Can't get minMaxvalues for " + lineNumber + ": " + lineNumber);
+											// it means that this field is not
+											// numeric, probably the table isn't
+											// big
+											if (t.Count <= opt.MAX_DISTINCT_VALUES_TO_BE_DICTIONARY_FIELD) {
+												c.GlobalColumnType = GlobalColumnType.DictionaryField;
+												Column resCol = urlcon.sendGetColumnDistribution(predicate.table,
+														predicate.column, opt);
+												c.Distribution = resCol.Distribution;
+											} else {
+												urlcon.WritePenaltyColumn(opt, c);
+											}
+										} else
+											c.Distribution = new Identificator(minMaxvalues.get(0), minMaxvalues.get(1),
+													distinctValues);
+									} else {
+										if (distinctValues <= opt.MAX_DISTINCT_VALUES_TO_BE_DICTIONARY_FIELD) {
+											c.GlobalColumnType = GlobalColumnType.DictionaryField;
+											Column resCol = urlcon.sendGetColumnDistribution(predicate.table,
+													predicate.column, opt);
+											c.Distribution = resCol.Distribution;
+										} else {
+											// look for Emissions
+											Column resCol = urlcon.sendGetColumnEmissions(predicate.table,
+													predicate.column, opt, t);
+											if (((DistributedFieldWithEmissions) resCol.Distribution).Values
+													.size() > 0) {
+												// it's field with emissions;
+												c.GlobalColumnType = GlobalColumnType.DistributedFieldWithEmissions;
+												c.Distribution = resCol.Distribution;
+												Column resCol2 = urlcon.sendGetColumnWithoutEmissions(predicate.table,
+														predicate.column, opt, resCol);
+												((DistributedFieldWithEmissions) c.Distribution).MinValue = ((DistributedFieldWithEmissions) resCol2.Distribution).MinValue;
+												((DistributedFieldWithEmissions) c.Distribution).MaxValue = ((DistributedFieldWithEmissions) resCol2.Distribution).MaxValue;
+											} else {
+												List<Double> minMaxvalues2 = urlcon.sendGetMinMaxColumnFromDistrField(
+														predicate.table, predicate.column);
+												if (minMaxvalues2.size() != 2) {
+													System.out.println("Can't get minMaxvalues for " + lineNumber + ": "
+															+ lineNumber);
+													urlcon.WritePenaltyColumn(opt, c);
+													// it means that this field
+													// is not numeric, probably
+													// the table isn't big
+													/// c.GlobalColumnType =
+													// GlobalColumnType.DictionaryField;
+													/// Column resCol =
+													// urlcon.sendGetColumnDistribution(predicate.table,
+													// predicate.column, opt);
+													/// c.Distribution =
+													// resCol.Distribution;
+												} else {
+													c.GlobalColumnType = GlobalColumnType.DistributedField;
+													c.Distribution = new DistributedField(minMaxvalues2.get(0),
+															minMaxvalues2.get(1));
+												}
+											}
+										}
+									}
+
+									opt.COLUMNS_DISTRIBUTION.put(columnName, c);
+									writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
+								} else {
+									// later
+									// TODO: check, whether the column exists
+									isTrash = true;
+									c = new Column(columnName);
+									opt.COLUMNS_DISTRIBUTION.put(columnName, c);
+									writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
+								}
+								try {
+
+									// urlcon.sendGet();
+
+								} catch (Exception ex) {
+
+									ex.printStackTrace();
+									urlcon.WritePenaltyColumn(opt, c);
+								}
+								// find out the distribution of the column
+
+							}
+						}
+					} else {
+						isTrash = true;
+
+					}
+				} catch (Exception ex) {
+					System.out.println("Exception at" + lineNumber + ": " + ex.toString());
+				}
+			}
+		}
+		return isTrash;
     }
     public static Map<String, Column> readColumnsFromInputData(Options opt) throws Exception {
     	Long pos = new Long(-1);
     	String startPositionPath = opt.FILE_INPUT.replace(".csv", opt.FILE_START_POSITION + ".csv");
     	File f = new File(startPositionPath);
     	if(f.exists() && !f.isDirectory()) { 
-    	    // do something
+    	    // do something... or nothing? On purpose?
     	}
     	else
     	{
@@ -354,7 +332,7 @@ public static List<String> listFilesForFolder(final File folder) {
     	
     	Scanner position = new Scanner(new FileInputStream(opt.FILE_INPUT.replace(".csv", opt.FILE_START_POSITION + ".csv")));
     	
-    	 while (position.hasNext()) 
+    	while (position.hasNext()) 
     	 {
     		 String s = position.nextLine();
     		 pos = Long.parseLong(s);
