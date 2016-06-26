@@ -201,6 +201,7 @@ public static List<String> listFilesForFolder(final File folder) {
 		            				((DictionaryField)opt.COLUMNS_DISTRIBUTION.get(columnName).Distribution).AddValue(value);
 		            		}
 		            		else {
+
 		            			long distinctValues = urlcon.sendGetDistinctColumnCount(predicate.table, predicate.column, opt);
 		            			
 		            			if (distinctValues != -1 && distinctValues != -2) {
@@ -267,28 +268,29 @@ public static List<String> listFilesForFolder(final File folder) {
 		            			else {
 		            				// later
 		            				// TODO: check, whether the column exists
-		            				c = new Column(columnName);
-		            				if (distinctValues==-1) {
-			            				isTrash = true;
-		            				}
+		            				
 		            				//If return error is -2 it means we had a timeout and the server couln't count the distincts. 
 		            				//We asume it is a distributed column and obtain min and max to write it
-		            				else if (distinctValues==-2) {
+		            				if (distinctValues==-2 ||distinctValues==-1) {
+		            					c = new Column(columnName);
 		            					List<Double> minMaxvalues3= urlcon.sendGetMinMaxColumnFromDistrField(predicate.table, predicate.column);
 		                				if (minMaxvalues3.size() != 2)
 		                				{
-		                					System.out.println("Can't get minMaxvalues for " + lineNumber + ": " + lineNumber);
+		                					System.out.println("For SocketTimeOut column we couldn't obtain also min max. Too many values " + lineNumber + ": " + lineNumber);
 		                					urlcon.WritePenaltyColumn(opt, c);
+		                					isTrash = true;
+		    	            				opt.COLUMNS_DISTRIBUTION.put(columnName, c);
+		    	            				writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
 		                					// it means that this field is not numeric
 		                				}
 		                				else {
-		                					c = new Column(columnName);
 		                					c.GlobalColumnType = GlobalColumnType.DistributedField;
 		                					c.Distribution = new DistributedField(minMaxvalues3.get(0), minMaxvalues3.get(1));
+		                					opt.COLUMNS_DISTRIBUTION.put(columnName, c);
+				            				writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
 		                				}
 		            				}
-		            				opt.COLUMNS_DISTRIBUTION.put(columnName, c);
-		            				writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
+		            				
 		            			}
 		            			try {
 		            				//urlcon.sendGet();

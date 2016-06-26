@@ -33,6 +33,10 @@ public class Query {
                 throw new ParseException("Table name contains dot!", table);
             }
 
+            if (table.contains("(")||table.contains(")")) {
+                throw new ParseException("Table name contains parentheses!", table);
+            }
+            
             if (!table.isEmpty()) {
                 tablesFiltered.add(GlobalCaches.strings().deduplicate(table));
             }
@@ -54,7 +58,8 @@ public class Query {
         }
         List<List<Predicate>> whereParts = new ArrayList<>(clauses.length);
         for (String clause : clauses) {
-            String[] terms = Regex.orRegex.split(clause);
+        	clause= clause.replaceAll("[()]","");
+        	String[] terms = Regex.orRegex.split(clause);
             /// corrections
             if (terms.length > 1)
             	this.hasOrPredicates = true;
