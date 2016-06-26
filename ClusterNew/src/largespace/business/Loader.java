@@ -201,9 +201,9 @@ public static List<String> listFilesForFolder(final File folder) {
 		            				((DictionaryField)opt.COLUMNS_DISTRIBUTION.get(columnName).Distribution).AddValue(value);
 		            		}
 		            		else {
-		            			
 		            			long distinctValues = urlcon.sendGetDistinctColumnCount(predicate.table, predicate.column, opt);
-		            			if (distinctValues != -1) {
+		            			
+		            			if (distinctValues != -1 && distinctValues != -2) {
 		                			c = new Column(columnName);
 		                			if (t.Count == distinctValues) {
 		                				// it's identificator field, save as identificator
@@ -267,8 +267,26 @@ public static List<String> listFilesForFolder(final File folder) {
 		            			else {
 		            				// later
 		            				// TODO: check, whether the column exists
-		            				isTrash = true;
 		            				c = new Column(columnName);
+		            				if (distinctValues==-1) {
+			            				isTrash = true;
+		            				}
+		            				//If return error is -2 it means we had a timeout and the server couln't count the distincts. 
+		            				//We asume it is a distributed column and obtain min and max to write it
+		            				else if (distinctValues==-2) {
+		            					List<Double> minMaxvalues3= urlcon.sendGetMinMaxColumnFromDistrField(predicate.table, predicate.column);
+		                				if (minMaxvalues3.size() != 2)
+		                				{
+		                					System.out.println("Can't get minMaxvalues for " + lineNumber + ": " + lineNumber);
+		                					urlcon.WritePenaltyColumn(opt, c);
+		                					// it means that this field is not numeric
+		                				}
+		                				else {
+		                					c = new Column(columnName);
+		                					c.GlobalColumnType = GlobalColumnType.DistributedField;
+		                					c.Distribution = new DistributedField(minMaxvalues3.get(0), minMaxvalues3.get(1));
+		                				}
+		            				}
 		            				opt.COLUMNS_DISTRIBUTION.put(columnName, c);
 		            				writeColumn(opt.FILE_CLMN_OUTPUT, c, opt);
 		            			}
@@ -832,12 +850,12 @@ public static List<String> listFilesForFolder(final File folder) {
 
             double[] mm = new double[2];
             try {
-	            mm[0] = Double.parseDouble(vals[1]);
-	            mm[1] = Double.parseDouble(vals[2]);
-	
-	            res.put(vals[0], mm);
+            mm[0] = Double.parseDouble(vals[1]);
+            mm[1] = Double.parseDouble(vals[2]);
+
+            res.put(vals[0], mm);
             } catch (Exception e){}
-       	}
+        	}
 
         scanner.close();
         return res;

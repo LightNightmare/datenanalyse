@@ -115,6 +115,8 @@ public class HttpURLConnectionExt {
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
 	        //we shouldn't set timeout here because of we need to know at any case
+	        //Modified Readtimeout to 30s when getting distinct counts to try to reduce execution time. 
+	        //There are a lot of distributed columns that cause a time out. If the query requires more than 30 seconds we assume it is distrubuted.
 	        con.setReadTimeout(30000);
 	        // optional default is GET
 	        con.setRequestMethod("GET");
@@ -163,7 +165,8 @@ public class HttpURLConnectionExt {
         }
         catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + tableName + "." + columnName);
-     	   //return false;
+        	distColumnCount=-2;
+        	return distColumnCount;
      	} catch (java.io.IOException e) {
      		System.out.println("java.io.IOException for column: " + tableName + "." + columnName);
      	   //return false;
