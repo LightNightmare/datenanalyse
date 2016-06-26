@@ -115,7 +115,7 @@ public class HttpURLConnectionExt {
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
 	        //we shouldn't set timeout here because of we need to know at any case
-	        con.setReadTimeout(50000);
+	        con.setReadTimeout(30000);
 	        // optional default is GET
 	        con.setRequestMethod("GET");
 	
