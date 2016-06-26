@@ -27,13 +27,11 @@ public class HttpURLConnectionExt {
 	private final String USER_AGENT = "Mozilla/5.0";
 	private final int CorrectresponseCode = 200;
 	
-	public String prepareQuery(String cmd)
-	{
+	public String prepareQuery(String cmd) {
 		return cmd.replaceAll(" " , "%20");
 	}
 	
-	public String GetParams(String cmd, String format)
-	{
+	public String GetParams(String cmd, String format) {
 		return "?cmd="+cmd+"&format="+format;
 	}
 	
@@ -45,8 +43,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
         
         URL obj = new URL(url);
-        try
-        {
+        try {
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
 	        //con.setReadTimeout(20000);
@@ -59,8 +56,7 @@ public class HttpURLConnectionExt {
 	
 	        int responseCode = con.getResponseCode();
 	        
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -68,8 +64,7 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
+		        	if (iLineCount == 2) {
 		            response.append(inputLine);
 		        	}
 		        	iLineCount++;
@@ -78,18 +73,14 @@ public class HttpURLConnectionExt {
 		
 		        //print result
 		        //System.out.println(response.toString());
-		        try
-		        {
+		        try {
 		        int foo = Integer.parseInt(response.toString());
 		        t.Count = foo;
-		        }
-		        catch(Exception ex)
-		        {
+		        } catch(Exception ex) {
 		        	System.out.println(ex);
 		        }
 	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+        } catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + t.Name);
         	
      	   //return false;
@@ -126,8 +117,7 @@ public class HttpURLConnectionExt {
 	
 	        int responseCode = con.getResponseCode();
 
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -135,8 +125,7 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
+		        	if (iLineCount == 2) {
 		            response.append(inputLine);
 		        	}
 		        	iLineCount++;
@@ -144,21 +133,16 @@ public class HttpURLConnectionExt {
 		        }
 		        in.close(); 
 		        
-		        try
-		        {
+		        try {
 		        	String respString = response.toString();
-		        	if (respString.equals(""))
-		        	{
+		        	if (respString.equals("")) {
 		        		System.out.println("Didn't have distinct value for column " + columnName + "in table" + tableName);
 		        	}
-		        	else
-		        	{
+		        	else {
 				        long foo = Long.parseLong(respString);
 				        distColumnCount = foo;
 		        	}
-		        }
-		        catch(Exception ex)
-		        {
+		        } catch(Exception ex) {
 		        	System.out.println(ex);
 		        }
 	        }
@@ -182,8 +166,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
    
         URL obj = new URL(url);
-        try
-        {
+        try {
         	HttpURLConnection.setFollowRedirects(false);
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
@@ -197,8 +180,7 @@ public class HttpURLConnectionExt {
 	
 	        int responseCode = con.getResponseCode();
 
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -206,29 +188,24 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
+		        	if (iLineCount == 2) {
 		            response.append(inputLine);
 		        	}
 		        	iLineCount++;
 		        }
 		        in.close(); 
 		        
-		        try
-		        {
+		        try {
 		        	String[] valueProperty = response.toString().split(",");
 		        	long minValue = Long.parseLong(valueProperty[0]);
 		        	long maxValue = Long.parseLong(valueProperty[1]);
 		        	minMaxList.add(minValue);
 		        	minMaxList.add(maxValue);
-		        }
-		        catch(Exception ex)
-		        {
+		        } catch(Exception ex) {
 		        	System.out.println(ex);
 		        }
 	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+        } catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + tableName + "." + columnName);
      	   //return false;
      	} catch (java.io.IOException e) {
@@ -245,8 +222,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
    
         URL obj = new URL(url);
-        try
-        {
+        try {
         	HttpURLConnection.setFollowRedirects(false);
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
@@ -260,8 +236,7 @@ public class HttpURLConnectionExt {
 	
 	        int responseCode = con.getResponseCode();
 
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -269,29 +244,24 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
+		        	if (iLineCount == 2) {
 		            response.append(inputLine);
 		        	}
 		        	iLineCount++;
 		        }
 		        in.close(); 
 		        
-		        try
-		        {
+		        try {
 		        	String[] valueProperty = response.toString().split(",");
 		        	Double minValue = Double.parseDouble(valueProperty[0]);
 		        	Double maxValue = Double.parseDouble(valueProperty[1]);
 		        	minMaxList.add(minValue);
 		        	minMaxList.add(maxValue);
-		        }
-		        catch(Exception ex)
-		        {
+		        } catch(Exception ex) {
 		        	System.out.println(ex);
 		        }
 	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+        } catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + tableName + "." + columnName);
      	   //return false;
      	} catch (java.io.IOException e) {
@@ -309,8 +279,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
    
         URL obj = new URL(url);
-        try
-        {
+        try {
         	HttpURLConnection.setFollowRedirects(false);
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
@@ -324,8 +293,7 @@ public class HttpURLConnectionExt {
 	        int responseCode = con.getResponseCode();
 	        
 	        
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -338,23 +306,15 @@ public class HttpURLConnectionExt {
 		       
 		        
 			        while ((inputLine = in.readLine()) != null) {
-			        	if (iLineCount < 2)
-			        	{
-			        	}
-			        	else 
-			        	{
+			        	if (iLineCount < 2) {}
+			        	else  {
 			        		String[] valueProperty = inputLine.split(",");
 				        	String columnValue =valueProperty[0].toLowerCase();
 				        	Long valueCount = Long.parseLong(valueProperty[1]);
 				        	accumulateCount = accumulateCount + valueCount;
-				        	try
-				        	{
+				        	try {
 					        ((DictionaryField)c.Distribution).AddValue(columnValue, new ValueState(valueCount, accumulateCount, columnValue));
-				        	}
-				        	catch (Exception e)
-				        	{
-
-				        	}
+				        	} catch (Exception e) { }
 		
 			            response.append(inputLine + ";");
 			        	}
@@ -364,14 +324,12 @@ public class HttpURLConnectionExt {
 			        
 			        if (iLineCount <= 2)
 			        	somethingwrong = true;
-		        if (somethingwrong)
-		        {
+		        if (somethingwrong) {
 		        	c.SomethingWrong = somethingwrong;
 		        }
 		        in.close(); 
 	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+        } catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + c.Name);
 
         	WritePenaltyColumn(opt, c);
@@ -388,8 +346,7 @@ public class HttpURLConnectionExt {
 	public void WritePenaltyColumn(Options opt, Column c) throws Exception
 	{
 		Column c1 = opt.PENALTY_COLUMNS_DISTRIBUTION.get(c.Name);
-		if (c1 == null)
-		{
+		if (c1 == null) {
 			
 			opt.PENALTY_COLUMNS_DISTRIBUTION.put(c.Name, c);
 			
@@ -398,8 +355,7 @@ public class HttpURLConnectionExt {
 	    	if(f.exists() && !f.isDirectory()) { 
 	    	    // do something
 	    	}
-	    	else
-	    	{
+	    	else {
 	    		f.createNewFile();
 	    		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(columnspenOutputFile)));
 	    		writer.close();
@@ -425,8 +381,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
    
         URL obj = new URL(url);
-        try
-        {
+        try {
         	HttpURLConnection.setFollowRedirects(false);
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
@@ -440,8 +395,7 @@ public class HttpURLConnectionExt {
 	        int responseCode = con.getResponseCode();
 	        
 	        
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -454,11 +408,8 @@ public class HttpURLConnectionExt {
 		       
 		        
 			        while ((inputLine = in.readLine()) != null) {
-			        	if (iLineCount < 2)
-			        	{
-			        	}
-			        	else 
-			        	{
+			        	if (iLineCount < 2) { }
+			        	else  {
 			        		String[] valueProperty = inputLine.split(",");
 				        	Object columnValue =valueProperty[0];
 				        	Long valueCount = Long.parseLong(valueProperty[1]);
@@ -474,14 +425,13 @@ public class HttpURLConnectionExt {
 			        
 			        if (iLineCount <= 2)
 			        	somethingwrong = true;
-		        if (somethingwrong)
-		        {
+			        
+		        if (somethingwrong) {
 		        	c.SomethingWrong = somethingwrong;
 		        }
 		        in.close(); 
 	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+        } catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + c.Name);
 
      	} catch (java.io.IOException e) {
@@ -496,8 +446,7 @@ public class HttpURLConnectionExt {
 		Column c = new Column(tableName + '.' + columnName);
 		c.Distribution = new DistributedFieldWithEmissions();
 		String inClause = "(";
-		for (ValueState vs : ((DistributedFieldWithEmissions)cEm.Distribution).Values.values())
-		{
+		for (ValueState vs : ((DistributedFieldWithEmissions)cEm.Distribution).Values.values()) {
 			inClause = inClause + vs.Value.toString() + ",";
 		}
 		inClause = inClause + ")";
@@ -510,8 +459,7 @@ public class HttpURLConnectionExt {
         String url = baseUrl + GetParams(prepareCmd, "csv");
    
         URL obj = new URL(url);
-        try
-        {
+        try {
         	HttpURLConnection.setFollowRedirects(false);
 	        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 	        con.setConnectTimeout(5000);
@@ -525,8 +473,7 @@ public class HttpURLConnectionExt {
 	        int responseCode = con.getResponseCode();
 	        
 	        
-	        if (responseCode == CorrectresponseCode)
-	        {
+	        if (responseCode == CorrectresponseCode) {
 		        BufferedReader in = new BufferedReader(
 		                new InputStreamReader(con.getInputStream()));
 		        String inputLine;
@@ -534,30 +481,25 @@ public class HttpURLConnectionExt {
 		
 		        int iLineCount = 0;
 		        while ((inputLine = in.readLine()) != null) {
-		        	if (iLineCount == 2)
-		        	{
+		        	if (iLineCount == 2) {
 		            response.append(inputLine);
 		        	}
 		        	iLineCount++;
 		        }
 		        in.close(); 
 		        
-		        try
-		        {
+		        try {
 		        	String[] valueProperty = response.toString().split(",");
 		        	double minValue = Double.parseDouble(valueProperty[0]);
 		        	double maxValue = Double.parseDouble(valueProperty[1]);
 		        	((DistributedFieldWithEmissions)c.Distribution).MinValue = minValue;
 		        	((DistributedFieldWithEmissions)c.Distribution).MaxValue = maxValue;
 
-		        }
-		        catch(Exception ex)
-		        {
+		        } catch(Exception ex) {
 		        	System.out.println(ex);
 		        }
 	        }
-        }
-        catch (java.net.SocketTimeoutException e) {
+        } catch (java.net.SocketTimeoutException e) {
         	System.out.println("java.net.SocketTimeoutException for column: " + c.Name);
 
      	} catch (java.io.IOException e) {
