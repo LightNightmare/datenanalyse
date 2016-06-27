@@ -24,12 +24,13 @@ import largespace.clustering.Identificator;
 public final class Loader {
     private Loader() {
     }
-
+    
     public static void preprocess(String inputFile, String outputFile) throws IOException {
         Scanner scanner = new Scanner(new FileInputStream(inputFile));
         BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputFile)));
         Pattern regex = Pattern.compile("\"[^\"]+\"");
         scanner.nextLine();
+        
         while (scanner.hasNext()) {
             String s = scanner.nextLine().replace("\"\"", "");
             Matcher citedMatcher = regex.matcher(s);
@@ -93,47 +94,52 @@ public final class Loader {
 
 	
 
-public static List<String> listFilesForFolder(final File folder) {
-	List<String> files = new ArrayList<String>();
-    for (final File fileEntry : folder.listFiles()) {
-        if (fileEntry.isDirectory()) {
-
-        } else {
-            String fileName =fileEntry.getName();
-            String[] strList = fileName.split("_");
-            if ((strList[0].equals("sample")) ||(strList[0].equals("sample.csv")))
-            	files.add(fileName);
-        }
-    }
-    return files;
-}
+	public static List<String> listFilesForFolder(final File folder) {
+		List<String> files = new ArrayList<String>();
+	    for (final File fileEntry : folder.listFiles()) {
+	        if (fileEntry.isDirectory()) {
+	
+	        } else {
+	            String fileName =fileEntry.getName();
+	            String[] strList = fileName.split("_");
+	            if ((strList[0].equals("sample")) ||(strList[0].equals("sample.csv")))
+	            	files.add(fileName);
+	        }
+	    }
+	    return files;
+	}
     public static List<String> fromClustersQueriesFiles(Options opt) {
     	List<String> files = new ArrayList<String>();
     	final File folder = new File(opt.FOLDER_C_OUTPUT);
     	files = listFilesForFolder(folder);
     	return files;
     }
+    
     public static void readFromClause(Query q, Options opt) throws Exception {
     	List<String> fromTables =q.fromTables;
-        
+	
         for (String tName : fromTables) {
-        	Table t = null;
-        	if (!opt.TABLESWITHCOUNT.containsKey(tName)) {
-        		HttpURLConnectionExt urlcon = new HttpURLConnectionExt();
-        		t=  urlcon.sendGetTableCount(tName);
-        		//t = new Table();
-        		//t.Name = tName;
-    			opt.TABLESWITHCOUNT.put(tName, t);
-    			writeTables(opt);
-    		}
-        	t = opt.TABLESWITHCOUNT.get(tName);
+        	if(ListTables.listTables.contains(tName)){
+	        	Table t = null;
+	        	if (!opt.TABLESWITHCOUNT.containsKey(tName)) {
+	        		HttpURLConnectionExt urlcon = new HttpURLConnectionExt();
+	        		t=  urlcon.sendGetTableCount(tName);
+	        		//t = new Table();
+	        		//t.Name = tName;
+	    			opt.TABLESWITHCOUNT.put(tName, t);
+	    			writeTables(opt);
+	    		}
+	        	t = opt.TABLESWITHCOUNT.get(tName);
+        	}
         }
         for (String tName : fromTables) {
-        	Table t = opt.TABLESWITHCOUNT.get(tName);
-        	for (String tNameLinks : fromTables) {
-        		if (!t.Links.contains(tNameLinks)) {
-        			t.Links.add(tNameLinks);
-        		}
+        	if(ListTables.listTables.contains(tName)){
+	        	Table t = opt.TABLESWITHCOUNT.get(tName);
+	        	for (String tNameLinks : fromTables) {
+	        		if (!t.Links.contains(tNameLinks)) {
+	        			t.Links.add(tNameLinks);
+	        		}
+	        	}
         	}
         }
     }

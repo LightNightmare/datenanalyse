@@ -18,7 +18,7 @@ public final class DBScan {
     }
 
     public static void mineClusters(Options opt) throws Exception {
-       
+    	
     	if (opt.PREPROCESS)
     		// This has already done, The Preprocess(opt) analyze query log and find pre-clusters based on FROM part of the statements
     		Preprocess(opt);
