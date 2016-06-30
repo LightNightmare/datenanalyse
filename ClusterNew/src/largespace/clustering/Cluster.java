@@ -21,7 +21,8 @@ public class Cluster {
 
             if (current != point
                     && !visited[curID]
-                    && !current.fromTables.equals(point.fromTables)
+                    && !isClusterMember[curID] //Uncomment to avoid comparing to already clustered queries.
+                    && !current.fromTables.equals(point.fromTables) // Exact copies are ignored.
                     && !current.whereClausesTerms.equals(point.whereClausesTerms)
                     ) {
                 visited[curID] = true;

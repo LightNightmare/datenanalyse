@@ -145,6 +145,7 @@ public class Query {
             double dist = computeDistance(query, opt);
 
             // distance counter
+            // Keeps track of the amount of queries in regions of decreasing size (with radius epsilon/2^j)
             for (int j = 0; j < d.length; ++j) {
                 if (dist <= opt.EPSILON / Math.pow(2, j)) {
                     dTmp[j].incrementAndGet();
