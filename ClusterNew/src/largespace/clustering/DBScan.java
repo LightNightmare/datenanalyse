@@ -31,10 +31,10 @@ public final class DBScan {
     		Loader.readColumns(opt,  opt.FILE_CLMN_OUTPUT);
     		
     		// get the list of input files (sample_{0})
-    		//List<String> files = Loader.fromClustersQueriesFiles(opt);
-    		int i = 0;
-    		//analyze every pre-cluster independantly
-    		//for (String file: files)
+	    		//List<String> files = Loader.fromClustersQueriesFiles(opt);
+	    		int i = 0;
+	    		//analyze every pre-cluster independantly
+	    		//for (String file: files)
     		{
     			{
     			System.out.println("Processing i = " + i);
