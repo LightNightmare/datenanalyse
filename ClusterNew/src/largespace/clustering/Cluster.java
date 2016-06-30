@@ -26,7 +26,7 @@ public class Cluster {
                     && !current.whereClausesTerms.equals(point.whereClausesTerms)
                     ) {
                 visited[curID] = true;
-                List<Query> curNeighbors = current.region(data, opt);
+                List<Query> curNeighbors = current.region(data, visited, isClusterMember, opt);   // Added Visited and Is cluster to region to avoid Comparisons
 
                 if (curNeighbors.size() >= opt.MIN_PTS) {
                     for (Query temp : curNeighbors) {

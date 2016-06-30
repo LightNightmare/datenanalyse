@@ -135,13 +135,26 @@ public class Query {
         }
     }
 
-    public List<Query> region(List<Query> data, Options opt) {
+    public List<Query> region(List<Query> data, boolean[] visited, boolean[] isClusterMember,  Options opt) {
         AtomicInteger[] dTmp = new AtomicInteger[d.length];
         for (int i = 0; i < dTmp.length; ++i) {
             dTmp[i] = new AtomicInteger();
         }
-
-        List<Query> result = data.parallelStream().map((query) -> {
+        
+        //Added Parallel Stream to filter the queries for which we want to get the Neighborhood
+        //We remove visited and already cluster members
+        List<Query> filterData = data.parallelStream().map((query) -> {
+        	int curIDFilter = query.id;
+        	if (!visited[curIDFilter] && !isClusterMember[curIDFilter]) {//Uncomment to avoid comparing to already clustered queries.
+        		return query;
+        	}
+	        else {
+	            return null;
+	        }
+        }).filter((query) -> query != null).collect(Collectors.toCollection(LinkedList::new));
+        
+        
+        List<Query> result = filterData.parallelStream().map((query) -> {
             double dist = computeDistance(query, opt);
 
             // distance counter

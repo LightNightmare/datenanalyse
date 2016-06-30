@@ -84,7 +84,7 @@ public final class DBScan {
 
             if (!visited[current.id]) {
                 visited[current.id] = true;
-                List<Query> tmpNeighbors = current.region(data, opt);
+                List<Query> tmpNeighbors = current.region(data, visited, isClusterMember, opt);
 
                 if (tmpNeighbors.size() < opt.MIN_PTS) {
                     outliers.add(current);
