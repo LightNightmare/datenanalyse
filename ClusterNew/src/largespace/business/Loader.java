@@ -119,7 +119,7 @@ public final class Loader {
     	List<String> fromTables =q.fromTables;
 	
         for (String tName : fromTables) {
-        	if(ListTables.listTables.contains(tName)){
+        	if(ValidTables.tables.contains(tName)){
 	        	Table t = null;
 	        	if (!opt.TABLESWITHCOUNT.containsKey(tName)) {
 	        		HttpURLConnectionExt urlcon = new HttpURLConnectionExt();
@@ -133,7 +133,7 @@ public final class Loader {
         	}
         }
         for (String tName : fromTables) {
-        	if(ListTables.listTables.contains(tName)){
+        	if(ValidTables.tables.contains(tName)){
 	        	Table t = opt.TABLESWITHCOUNT.get(tName);
 	        	for (String tNameLinks : fromTables) {
 	        		if (!t.Links.contains(tNameLinks)) {
