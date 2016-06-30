@@ -481,9 +481,12 @@ public final class Loader {
                     }
                 
                 // if everything is fine, then include the data
-                data.add(q);
-              /// corrections
+                
                 }
+                
+                data.add(q);
+                /// corrections
+                
               /// corrections
             } catch (ParseException e) {
                 System.out.println("Line " + lineNumber + ": " + e.toString());

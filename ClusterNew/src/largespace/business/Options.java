@@ -36,7 +36,7 @@ public final class Options {
     public String FILE_MIN_MAX;
 
     @Parameter(names = "-PREPROCESS")
-    public Boolean PREPROCESS = true;
+    public Boolean PREPROCESS = false;
     
     @Parameter(names = "-EPSILON")
     public double EPSILON = 0.1;
