@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 public class MainClass {
     public static void main(String[] args) throws Exception {
+    	Long startTime = System.currentTimeMillis();
         Options opt = new Options();
         new JCommander(opt, args);
 
@@ -29,5 +30,10 @@ public class MainClass {
         }
 
         DBScan.mineClusters(opt);
+        Long endTime = System.currentTimeMillis();
+        Long runtime_seconds = (endTime - startTime) / 1000L;
+        System.out.println("Clustering took " + runtime_seconds + " seconds.");
+        System.out.println("Preprocessing was turned " + opt.PREPROCESS);
+        System.out.println("(FILE_PRE_OUTPUT is " + opt.FILE_PRE_OUTPUT + ")");
     }
 }
