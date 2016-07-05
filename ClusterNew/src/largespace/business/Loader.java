@@ -596,80 +596,82 @@ public final class Loader {
         int cid = 0;
         int clusterId = 0;
         for (Column c : columns.values()) {
-        	writer.write(c.Name);
-        	writer.write(";");
-        	if (c.GlobalColumnType == GlobalColumnType.Identificator) {
-        		try {
-	        		writer.write("Identificator");
-	        		writer.write(";");
-	        		writer.write(Long.toString(((Identificator)c.Distribution).MinValue));
-	        		writer.write(";");
-	        		writer.write(Long.toString(((Identificator)c.Distribution).MaxValue));
-	        		writer.write(";");
-        		} catch (Exception e) {
-        			writer.write("Exception, e = "+ e.toString());
-        		}
+        	if(!c.Name.contains("+") && !c.Name.contains("-") && !c.Name.contains("*") && !c.Name.contains("%") && !c.Name.contains("/") && !c.Name.contains("&") && !c.Name.contains("|") ){
+	        	writer.write(c.Name);
+	        	writer.write(";");
+	        	if (c.GlobalColumnType == GlobalColumnType.Identificator) {
+	        		try {
+		        		writer.write("Identificator");
+		        		writer.write(";");
+		        		writer.write(Long.toString(((Identificator)c.Distribution).MinValue));
+		        		writer.write(";");
+		        		writer.write(Long.toString(((Identificator)c.Distribution).MaxValue));
+		        		writer.write(";");
+	        		} catch (Exception e) {
+	        			writer.write("Exception, e = "+ e.toString());
+	        		}
+	        	}
+	        	if (c.GlobalColumnType == GlobalColumnType.DistributedField) {
+	        		try {
+		        		writer.write("DistributedField");
+		        		writer.write(";");
+		        		writer.write(Double.toString(((DistributedField)c.Distribution).MinValue));
+		        		writer.write(";");
+		        		writer.write(Double.toString(((DistributedField)c.Distribution).MaxValue));
+		        		writer.write(";");
+	        		} catch (Exception e) {
+	        			writer.write("Exception, e = "+ e.toString());
+	        		}
+	        	}
+	        	if (c.GlobalColumnType == GlobalColumnType.DistributedFieldWithEmissions) {
+	        		try {
+		        		writer.write("DistributedFieldWithEmissions");
+		        		writer.write(";");
+		        		writer.write(Double.toString(((DistributedFieldWithEmissions)c.Distribution).MinValue));
+		        		writer.write(";");
+		        		writer.write(Double.toString(((DistributedFieldWithEmissions)c.Distribution).MaxValue));
+		        		writer.write(";");
+		        		writer.write("Emissions");
+		        		writer.write(";");
+		        		Map<Object, ValueState> values = ((DistributedFieldWithEmissions)c.Distribution).Values;
+		        		for (ValueState v : values.values()) {
+		                	try {
+		                		if (v.Value == null)
+		                			v.Value = "null";
+		    	                writer.write(v.Value.toString() + " " + v.ValuesCount + " " + v.ValuesLessOrEqualCount);
+		    	                writer.write(";");
+		                	} catch(Exception ex) {
+		                		//System.out.println("ex = " + ex.toString());
+		                	}
+		                }
+	        		} catch (Exception e) {
+	        			writer.write("Exception, e = "+ e.toString());
+	        		}
+	        	}
+	        	if (c.GlobalColumnType == GlobalColumnType.DictionaryField) {
+	        		try {
+		        		writer.write("DictionaryField");
+		        		writer.write(";");
+		        		writer.write("Values");
+		        		writer.write(";");
+		        		Map<String, ValueState> values = ((DictionaryField)c.Distribution).Values;
+		        		for (ValueState v : values.values()) {
+		                	try {
+		                		if (v.Value != null) {
+		                			writer.write(v.Value.toString() + " " + v.ValuesCount + " " + v.ValuesLessOrEqualCount);
+		                			writer.write(";");
+		                		}
+		                	} catch(Exception ex) {
+		                		//System.out.println("ex = " + ex.toString());
+		                	}
+		                }
+	        		} catch (Exception e) {
+	        			writer.write("Exception, e = "+ e.toString());
+	        		}
+	        	}
+	                writer.newLine();
         	}
-        	if (c.GlobalColumnType == GlobalColumnType.DistributedField) {
-        		try {
-	        		writer.write("DistributedField");
-	        		writer.write(";");
-	        		writer.write(Double.toString(((DistributedField)c.Distribution).MinValue));
-	        		writer.write(";");
-	        		writer.write(Double.toString(((DistributedField)c.Distribution).MaxValue));
-	        		writer.write(";");
-        		} catch (Exception e) {
-        			writer.write("Exception, e = "+ e.toString());
-        		}
-        	}
-        	if (c.GlobalColumnType == GlobalColumnType.DistributedFieldWithEmissions) {
-        		try {
-	        		writer.write("DistributedFieldWithEmissions");
-	        		writer.write(";");
-	        		writer.write(Double.toString(((DistributedFieldWithEmissions)c.Distribution).MinValue));
-	        		writer.write(";");
-	        		writer.write(Double.toString(((DistributedFieldWithEmissions)c.Distribution).MaxValue));
-	        		writer.write(";");
-	        		writer.write("Emissions");
-	        		writer.write(";");
-	        		Map<Object, ValueState> values = ((DistributedFieldWithEmissions)c.Distribution).Values;
-	        		for (ValueState v : values.values()) {
-	                	try {
-	                		if (v.Value == null)
-	                			v.Value = "null";
-	    	                writer.write(v.Value.toString() + " " + v.ValuesCount + " " + v.ValuesLessOrEqualCount);
-	    	                writer.write(";");
-	                	} catch(Exception ex) {
-	                		//System.out.println("ex = " + ex.toString());
-	                	}
-	                }
-        		} catch (Exception e) {
-        			writer.write("Exception, e = "+ e.toString());
-        		}
-        	}
-        	if (c.GlobalColumnType == GlobalColumnType.DictionaryField) {
-        		try {
-	        		writer.write("DictionaryField");
-	        		writer.write(";");
-	        		writer.write("Values");
-	        		writer.write(";");
-	        		Map<String, ValueState> values = ((DictionaryField)c.Distribution).Values;
-	        		for (ValueState v : values.values()) {
-	                	try {
-	                		if (v.Value != null) {
-	                			writer.write(v.Value.toString() + " " + v.ValuesCount + " " + v.ValuesLessOrEqualCount);
-	                			writer.write(";");
-	                		}
-	                	} catch(Exception ex) {
-	                		//System.out.println("ex = " + ex.toString());
-	                	}
-	                }
-        		} catch (Exception e) {
-        			writer.write("Exception, e = "+ e.toString());
-        		}
-        	}
-                writer.newLine();
-
+	             
         }
 
         writer.close();
