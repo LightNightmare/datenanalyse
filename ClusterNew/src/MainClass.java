@@ -30,6 +30,8 @@ public class MainClass {
         }
 
         DBScan.mineClusters(opt);
+        
+        //runtime
         long endTime = System.currentTimeMillis();
         long runtime_seconds = (endTime - startTime)/1000;
         System.out.println("Clustering took " + runtime_seconds + " seconds.");
