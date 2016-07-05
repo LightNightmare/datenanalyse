@@ -31,6 +31,9 @@ public class MainClass {
 
         DBScan.mineClusters(opt);
         long endTime = System.currentTimeMillis();
-        System.out.println("Took "+ (endTime - startTime) + " ns");
+        long runtime_seconds = (endTime - startTime)/1000;
+        System.out.println("Clustering took " + runtime_seconds + " seconds.");
+        System.out.println("Preprocessing was turned " + opt.PREPROCESS);
+        System.out.println("(FILE_PRE_OUTPUT is " + opt.FILE_PRE_OUTPUT + ")");
     }
 }
