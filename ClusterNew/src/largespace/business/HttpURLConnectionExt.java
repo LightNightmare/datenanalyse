@@ -128,8 +128,7 @@ public class HttpURLConnectionExt {
 		        	if (iLineCount == 2) {
 		            response.append(inputLine);
 		        	}
-		        	iLineCount++;
-		        	
+		        	iLineCount++;		        	
 		        }
 		        in.close(); 
 		        

@@ -11,7 +11,9 @@ import java.util.Scanner;
 
 public class MainClass {
     public static void main(String[] args) throws Exception {
-        Options opt = new Options();
+        long startTime = System.nanoTime();
+        System.out.println("Start Time "+ (startTime) + " ns");
+    	Options opt = new Options();
         new JCommander(opt, args);
 
         if (opt.FILE_TABLES != null) {
@@ -29,5 +31,8 @@ public class MainClass {
         }
 
         DBScan.mineClusters(opt);
+        long endTime = System.nanoTime();
+        System.out.println("End Time "+ (endTime) + " ns");
+        System.out.println("Took "+ (endTime - startTime) + " ns");
     }
 }
