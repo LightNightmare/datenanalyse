@@ -20,10 +20,14 @@ public final class DBScan {
     public static void mineClusters(Options opt) throws Exception {
     	
     	if (opt.PREPROCESS)
+    	{
+    		System.out.println("!!! PREPROCESSING IS TURNED ON");
     		// This has already done, The Preprocess(opt) analyze query log and find pre-clusters based on FROM part of the statements
     		Preprocess(opt);
+    	}
     	else
     	{
+    		System.out.println("!!! PREPROCESSING IS TURNED OFF");
     		//from file read table names and the count of rows in them
     		Loader.readTables(opt);
     		
