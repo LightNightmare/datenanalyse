@@ -510,7 +510,7 @@ public final class Loader {
     		writer.close();
     	}
         BufferedWriter writer = new BufferedWriter(new FileWriter(columnsOutputFile, true));
-
+        if(!c.Name.contains("+") && !c.Name.contains("-") && !c.Name.contains("*") && !c.Name.contains("%") && !c.Name.contains("/") ){
         	writer.write(c.Name);
         	writer.write(";");
         	if (c.GlobalColumnType == GlobalColumnType.Identificator){
@@ -583,6 +583,7 @@ public final class Loader {
         			writer.write("Exception, e = "+ e.toString());
         		}
                 
+        	}
         }
         writer.newLine();
         writer.close();
