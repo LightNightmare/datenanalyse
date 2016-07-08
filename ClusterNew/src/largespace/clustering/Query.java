@@ -249,15 +249,16 @@ public class Query {
 
     
     private double computeWhereDistance(Query other, Options opt) {
+    	/*
+    	if (getCommonTables(this.fromTables, other.fromTables).isEmpty())
+    		return 1;
     	
-    	//List<String> commonTables = getCommonTables(this.fromTables, other.fromTables);
-    	List<String> queryTables = new ArrayList<>();
+    	//deduplicating the names of tables in queries
+    	Set<String> queryTables = new HashSet<>();
     	queryTables.addAll(fromTables);
     	queryTables.addAll(other.fromTables);
     	if (queryTables.size() == 0)
     		return 1;
-    	
-    	//Table largestTable = returnLargestCommonTable(commonTables, opt);
     	
     	long overallTableSize = 0;
     	double finalResult = 0;
@@ -269,6 +270,10 @@ public class Query {
     	
     	for (String tableName : queryTables) {
     		Table currentTable = opt.TABLESWITHCOUNT.get(tableName);
+    		
+    		if (currentTable == null)
+    			continue;
+    		
     		overallTableSize += currentTable.Count;
     		
     		//calculating the overlaps needed to compute the distance
@@ -283,15 +288,20 @@ public class Query {
         	overall = overall - overlap;
         	currentDistance = 1 - ((double)overlap)/overall;
         	
-        	if (currentDistance <= (opt.EPSILON/2)) {
+        	if ((currentDistance != 0) && (currentDistance <= (opt.EPSILON/2))) {
         		double possibleFactor = Math.sqrt(currentDistance);
         		if (possibleFactor < scaleDownFactor) {
         			scaleDownFactor = possibleFactor;
         			indexOfSmallestDistance = currentIndex;
         		}
-        		distances[currentIndex] = currentTable.Count * currentDistance;
-        		currentIndex++;
         	}
+        	else if (currentDistance == 0) {
+        		scaleDownFactor = Math.sqrt(opt.EPSILON/2);
+    			indexOfSmallestDistance = currentIndex;
+        	}
+        	
+    		distances[currentIndex] = currentTable.Count * currentDistance;
+    		currentIndex++;
     	}
     	
     	for (int i = 0; i < distances.length; i++) {
@@ -301,9 +311,18 @@ public class Query {
     			finalResult += (distances[i] / overallTableSize);
     	}
     	
-    	return finalResult;
+    	return finalResult;*/
     	
-    	/*Long overlap = QueriesComparision.GetEstimatedRowsOverlap(this, other, largestTable, opt);
+    	//starting code, here just for a check
+    	
+    	List<String> commonTables = getCommonTables(this.fromTables, other.fromTables);
+    	if (commonTables.size() == 0)
+    		return 1;
+    	
+    	Table largestTable = returnLargestCommonTable(commonTables, opt);
+    	
+    	
+    	Long overlap = QueriesComparision.GetEstimatedRowsOverlap(this, other, largestTable, opt);
     	
     	Long overall = QueriesComparision.GetEstimatedRowsOverall(this, other, largestTable, opt);
     	if (overall == -1)
@@ -315,7 +334,7 @@ public class Query {
     		//System.out.println("Query1 = " + this.getFromString() + " " + this.getWhereString());
     		//System.out.println("Query2 = " + other.getFromString() + " " + other.getWhereString());
     	}
-    	return res;*/
+    	return res;
         
     }
 }

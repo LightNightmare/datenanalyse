@@ -86,7 +86,7 @@ public final class DBScan {
                 System.out.println("Processing query " + Integer.toString(current.id));
             }
 
-            if (!visited[current.id]) {
+            if (!visited[current.id] && !(isClusterMember[current.id])) {
                 visited[current.id] = true;
                 List<Query> tmpNeighbors = current.region(data, visited, isClusterMember, opt);
 
@@ -97,7 +97,7 @@ public final class DBScan {
                     Cluster C = new Cluster();
                     C.expand(current, tmpNeighbors, data, visited, isClusterMember, opt);
 
-                    if (C.points.size() >= opt.MIN_PTS * 3) {
+                    if (C.points.size() >= opt.MIN_PTS) {
                         ret.add(C);
                     }
                 }

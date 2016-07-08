@@ -42,7 +42,7 @@ public final class Options {
     public double EPSILON = 0.1;
 
     @Parameter(names = "-MIN_PTS")
-    public int MIN_PTS = 5;
+    public int MIN_PTS = 15;
 
 
     @Parameter(names = "-MAX_POINTS")

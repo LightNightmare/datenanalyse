@@ -1,0 +1,74 @@
+SAMPLE:
+
+processing 5035 queries:
+
+out_standard
+-> old distance function
+-> cluster time: 47 seconds
+-> number of clusters: 72
+-> number of outliers: 4815
+--> sum (outliers + clustered queries): 2385 + 4815 = 7200
+
+out_improvement1
+-> new distance function
+-> cluster time: 151 seconds
+-> number of clusters: 15
+-> number of outliers: 4963
+--> sum (outliers + clustered queries): 2825 + 4963 = 7788
+
+out_improvement2
+-> deduplicated names of tables, fixed the saving of distances
+-> cluster time: 162 seconds
+-> number of clusters: 15
+-> number of outliers: 4947
+--> sum (outliers + clustered queries): 2793 + 4947 = 7740
+
+out_improvement3
+-> added check for shared tables
+-> cluster time: 50 seconds
+-> number of clusters: 68
+-> number of outliers: 4823
+--> sum (outliers + clustered queries): 1987 + 4823 = 6810
+
+out_improvement4
+-> added correction for distances 0
+-> cluster time: 51 seconds
+-> number of clusters: 68
+-> number of outliers: 4833
+--> sum (outliers + clustered queries): 1993 + 4833 = 6826
+
+
+processing 5035 queries:
+
+out_standard_changed
+-> added the check if a query is a cluster memeber (DBScan, line 89)
+-> removed the *3 in the check if the cluster is big enough (DBScan, line 100)
+-> changed minPts to 15
+-> cluster time: 29 seconds
+-> number of clusters: 67
+-> number of outliers: 2729
+--> sum (outliers + clustered queries): 2306 + 2729 = 5035
+
+out_improvement5
+-> has all the improvements of the other team + our distance function
+-> cluster time: 70 seconds
+-> number of clusters: 62
+-> number of outliers: 3145
+--> sum (outliers + clustered queries): 1890 + 3145 = 5035
+
+
+4TH SET:
+
+processing 28187 queries:
+
+out_newFunction
+-> cluster time: 1047 seconds
+-> number of clusters: 89
+-> number of outliers: 24379
+--> sum (outliers + clustered queries): 3808 + 24379 = 28187
+
+out_oldFunction
+-> cluster time: 654 seconds
+-> number of clusters: 81
+-> number of outliers: 22835
+--> sum (outliers + clustered queries): 5352 + 22835 = 28187
